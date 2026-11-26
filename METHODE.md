@@ -80,21 +80,35 @@ Limites :
 - **Statuts** : « Concluido » ne distingue pas un concours attribué d'un concours annulé ou désert.
 - **Usage** : le script fait une quinzaine de requêtes, au plus une fois par jour, et ne télécharge ni ne rediffuse les documents. Source à citer : investinperu.pe (ProInversión), avec la date de consultation.
 
-## Étape 5 : fiche de deux pages
+## Étape 5 : note de deux pages
 
-`fiche.py` rassemble les étapes 2 à 4 dans une fiche PDF de deux pages, `exports/fiche_<date>.pdf`, imprimée par Chrome à partir du modèle `fiche/modele.html`.
+`fiche.py` rassemble les étapes 2 et 4 dans une note PDF de deux pages, `exports/fiche_<date>.pdf`, imprimée par Chrome à partir du modèle `fiche/modele.html`. Lecteur visé : une entreprise qui veut savoir quels grands projets publics existent, à quel stade, dans quels secteurs, par quel montage, et lesquels suivre.
 
-Contenu : chiffres clés, lecture, tableaux par secteur et par mode de réalisation, urgences et prévention (page 1) ; top 15, ferroviaire et métro, niveaux de gouvernement, évolution sur au moins 7 jours, consultations de ProInversión en cours, sources, méthode et sigles (page 2).
+La forme suit des règles observées dans des notes publiées par des cabinets de conseil et des institutions (Banque mondiale, OCDE, FMI, McKinsey, BCG, guides de graphiques de l'ONS et de la Banque mondiale) : chaque titre est un constat chiffré d'une phrase ; graphiques et tableaux numérotés, avec note et source dessous ; une couleur par stade, la même partout ; une seule police, une couleur d'accent et des gris.
+
+Contenu :
+- page 1 : titre-thèse, « À retenir », 4 chiffres clés, coût et budget par stade (graphique 1), secteurs et modes de réalisation découpés par stade (graphiques 2 et 3) ;
+- page 2 : date de début inscrite des projets en études détaillées (graphique 4), taille des projets (graphique 5), les 10 plus gros projets pas encore en travaux (tableau 1), les 10 projets en travaux au plus gros budget de l'année (tableau 2), niveaux de gouvernement (graphique 6), comment suivre un projet, sources, méthode et mots du MEF.
+
+**Stade d'un projet** (fonction `stade`), d'après les phases déclarées au MEF :
+- avant exécution : pas de formato 8, la phase d'exécution n'est pas ouverte ;
+- études détaillées : formato 8, parties A ou B (études détaillées, terrains), travaux pas lancés ;
+- travaux : formato 8, partie C. Elle s'ouvre quand les études détaillées sont validées : le chantier peut être lancé ou encore à lancer ;
+- clôture : formato 9 enregistré, travaux déclarés finis, contrats en liquidation. Un formato 9 « en attente de fin des travaux » reste en travaux.
+La colonne ETAPA_F8 était vide dans les fichiers des 20 et 23/11/2026 : si plus de la moitié des grands projets n'ont pas de phase, le script s'arrête.
+
+**Date de début inscrite** (graphique 4, tableau 1) : colonne FEC_INI_EJEC_FISICA, au format ISO. Pour un projet en études détaillées, c'est le plus souvent la date de début de toute la phase d'exécution, pas celle du chantier : la note dit « date de début inscrite », jamais « début des travaux ».
 
 Ce qui est fait à la main :
-- **`fiche/lecture.txt`** (à créer) : le paragraphe « Lecture », écrit par l'auteur (12 lignes au plus, environ 1 450 caractères ; une ligne vide entre deux paragraphes). Tant qu'il manque ou est vide, le PDF s'appelle `fiche_<date>_brouillon.pdf`, porte la mention « brouillon, ne pas diffuser » et n'est pas publié.
+- **`fiche/lecture.txt`** (à créer) : le texte « À retenir », la seule interprétation de la note, écrit par l'auteur (900 caractères au plus ; une ligne vide entre deux paragraphes). Tant qu'il manque ou est vide, le PDF s'appelle `fiche_<date>_brouillon.pdf`, porte la mention « brouillon » et n'est pas publié.
 - **`fiche/noms_courts.csv`** et **`fiche/noms_consultations.csv`** : des noms courts en français pour les projets et les consultations affichés (les intitulés du MEF font souvent plus de 200 caractères). Un projet absent du fichier garde son nom du MEF, coupé avant le lieu.
 
 Règles de présentation :
-- aucune entreprise citée en dehors des intitulés officiels du MEF, aucune région classée (seulement les trois niveaux de gouvernement) ;
-- l'évolution ne donne que des totaux : aucune baisse de budget ni sortie n'est détaillée projet par projet, et le motif d'une sortie n'est pas écrit (le fichier ne le donne pas) ;
-- les modes autres que l'APP, les travaux contre impôts, le marché public et la régie sont regroupés dans « Autres montages » ;
-- « budget ou dépense » ne parle que des crédits publics : le financement privé des APP n'apparaît pas dans le fichier ;
+- aucune entreprise citée en dehors des intitulés officiels du MEF, aucune région classée (seulement les trois niveaux de gouvernement), pas de politique intérieure, aucune administration française citée ;
+- les titres sont des constats chiffrés, recalculés à chaque lancement : aucun chiffre n'y est écrit en dur ;
+- les modes autres que le PPP (APP en espagnol), les travaux contre impôts, le marché public et la régie sont regroupés dans « Autres montages » ;
+- budget et dépense ne parlent que des crédits publics : le coût d'un PPP comprend la part privée, son budget non ;
+- avant l'impression, le script refuse la note si elle contient un tiret cadratin, un point d'exclamation inversé, le mot « IA », un nom d'administration, une valeur non calculée (nan) ou un mot de jugement dans un titre ;
 - le script vérifie que le PDF fait exactement deux pages.
 
 ## Étape 6 : carte des grands projets

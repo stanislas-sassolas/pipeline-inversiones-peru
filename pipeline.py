@@ -6,8 +6,9 @@
 4. proinversion.py  : consultations de ProInversión, une fois par jour (étape 4)
 5. fiche.py         : fiche de deux pages, exports/fiche_<date>.pdf (étape 5)
 6. carte.py         : carte interactive, exports/carte_<date>.html (étape 6)
-Avec --publier, copie ensuite la carte, la fiche (si elle n'est pas un brouillon) et deux captures d'écran dans
-docs/, le dossier que GitHub Pages sert comme site web, et y écrit la page d'accueil docs/index.html.
+7. note.py          : note épurée de trois pages, exports/note_<date>.pdf
+Avec --publier, copie ensuite la note, la carte, la fiche (si elle n'est pas un brouillon) et des captures
+d'écran dans docs/, le dossier que GitHub Pages sert comme site web, et y écrit la page d'accueil docs/index.html.
 
 Lancement : python pipeline.py                  (tout)
             python pipeline.py --sans-archivage (sans télécharger le fichier du MEF)
@@ -24,6 +25,7 @@ import carte
 import changements
 import fiche
 import indicateurs
+import note
 import proinversion
 
 DOCS = Path(__file__).parent / "docs"
@@ -38,8 +40,19 @@ def capture(page, png, largeur, hauteur):
                    check=True, capture_output=True, timeout=120)
 
 
+def capture_note(note_html, png):
+    """Aperçu de la page 1 de la note, avec ses marges, comme une feuille A4 (794 x 1123 px)."""
+    page = note_html.read_text(encoding="utf-8").replace(
+        "</head>", "<style>body{padding:16mm 20mm 0;background:#fff}</style></head>")
+    temporaire = note_html.with_name("note_apercu.html")
+    temporaire.write_text(page, encoding="utf-8")
+    capture(temporaire, png, 794, 1123)
+    temporaire.unlink(missing_ok=True)
+
+
 def publier():
-    """Met à jour docs/ avec les dernières sorties. La fiche n'est publiée que si sa lecture est écrite."""
+    """Met à jour docs/ avec les dernières sorties : la note épurée (si elle a été produite), la carte, et la fiche
+    dense (seulement si son texte « À retenir » est écrit)."""
     jour = max(changements.lister_archives()).isoformat()
     sorties = indicateurs.SORTIE_DIR
     (DOCS / "images").mkdir(parents=True, exist_ok=True)
@@ -51,25 +64,50 @@ def publier():
     if (DOCS / "images" / "carte.png").stat().st_size < 100_000:
         print("Attention : capture de la carte suspecte (fond de carte non chargé ? Internet est nécessaire).")
 
+    note_pdf = sorties / f"note_{jour}.pdf"
+    note_publiee = note_pdf.exists()
+    if note_publiee:
+        shutil.copyfile(note_pdf, DOCS / "note.pdf")
+        capture_note(sorties / f"note_{jour}.html", DOCS / "images" / "note.png")
+    else:
+        (DOCS / "note.pdf").unlink(missing_ok=True)
+        (DOCS / "images" / "note.png").unlink(missing_ok=True)
+
     fiche_pdf = sorties / f"fiche_{jour}.pdf"
     fiche_publiee = fiche_pdf.exists()  # sinon, seule la version « _brouillon » existe
     if fiche_publiee:
         shutil.copyfile(fiche_pdf, DOCS / "fiche.pdf")
-        # Capture de la page 1 : la page HTML de la fiche, à la largeur d'une feuille A4 (794 px).
-        capture(sorties / f"fiche_{jour}.html", DOCS / "images" / "fiche.png", 794, 1123)
     else:
         # Une fiche publiée plus tôt ne doit pas rester en ligne à côté de données plus récentes.
         (DOCS / "fiche.pdf").unlink(missing_ok=True)
-        (DOCS / "images" / "fiche.png").unlink(missing_ok=True)
-    (DOCS / "index.html").write_text(page_accueil(jour, fiche_publiee), encoding="utf-8")
-    print(f"docs/ mis à jour (données du {jour}{', fiche comprise' if fiche_publiee else ', sans la fiche : lecture à écrire'}).")
+    (DOCS / "images" / "fiche.png").unlink(missing_ok=True)
+    (DOCS / "index.html").write_text(page_accueil(jour, note_publiee, fiche_publiee), encoding="utf-8")
+    print(f"docs/ mis à jour (données du {jour} ; note : {'oui' if note_publiee else 'non'} ; "
+          f"fiche dense : {'oui' if fiche_publiee else 'non, texte À retenir à écrire'}).")
 
 
-def page_accueil(jour, fiche_publiee):
-    """Page d'accueil du site : ce que fait le projet, liens vers la carte et la fiche, méthode et limites."""
-    bloc_fiche = ('<a href="fiche.pdf"><img src="images/fiche.png" alt="Page 1 de la fiche"></a>'
-                  '<p><a href="fiche.pdf">Fiche de deux pages (PDF)</a></p>' if fiche_publiee
-                  else "<p>La fiche de deux pages est en préparation.</p>")
+def page_accueil(jour, note_publiee, fiche_publiee):
+    """Page d'accueil du site : la note et son but d'abord, puis la carte, la méthode et les sources."""
+    date = f"{jour[8:]}/{jour[5:7]}/{jour[:4]}"
+    bloc_note = ("""
+<h2>La note : deux générations de grands projets</h2>
+<div class="note-bloc">
+  <a href="note.pdf"><img src="images/note.png" alt="Première page de la note"></a>
+  <div>
+    <p class="but"><b>Le but de cette note.</b> Répondre en cinq minutes à une question simple : dans l'investissement
+    public péruvien, où va l'argent aujourd'hui, et où seront les projets de demain ? Elle s'adresse aux entreprises
+    et aux observateurs qui veulent une image claire du paysage, sans jargon.</p>
+    <p class="but"><b>En une phrase.</b> Le budget de cette année finance surtout des chantiers déclarés viables il y a
+    près de dix ans, alors que la vague suivante, plus de la moitié du coût, est encore sur plans et tient dans une
+    dizaine de très gros projets, dont plusieurs trains et métros.</p>
+    <p class="but"><b>Ce qu'elle n'est pas.</b> Ni une analyse complète (elle ne dit rien des contrats, des entreprises
+    ni du contexte politique), ni une recommandation, ni un document officiel. Elle s'en tient à ce que montre le
+    fichier du MEF, et elle est recalculée automatiquement à chaque nouvelle version.</p>
+    <p class="lien"><a href="note.pdf">Lire la note (PDF, 3 pages)</a></p>
+  </div>
+</div>""" if note_publiee else "")
+    lien_fiche = ('<p>Une fiche plus dense, avec tous les indicateurs : <a href="fiche.pdf">fiche de deux pages (PDF)</a>.</p>'
+                  if fiche_publiee else "")
     return f"""<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -77,44 +115,52 @@ def page_accueil(jour, fiche_publiee):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Grands projets d'investissement public au Pérou</title>
 <style>
-  body {{ font: 16px/1.55 Arial, Helvetica, sans-serif; color: #1a1a1a; max-width: 860px; margin: 0 auto; padding: 24px 16px; }}
-  h1 {{ color: #1f3a5f; font-size: 26px; margin-bottom: 4px; }}
-  h2 {{ color: #1f3a5f; font-size: 19px; margin-top: 28px; }}
-  .note {{ color: #555; font-size: 14px; }}
-  .sorties {{ display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }}
-  .sorties img {{ width: 100%; border: 1px solid #ccc; }}
-  @media (max-width: 640px) {{ .sorties {{ grid-template-columns: 1fr; }} }}
+  body {{ font: 17px/1.6 Georgia, "DejaVu Serif", "Times New Roman", serif; color: #141414; background: #fff;
+         max-width: 820px; margin: 0 auto; padding: 32px 16px 48px; }}
+  .surtitre {{ font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #2b3f6b; margin: 0 0 10px; }}
+  h1 {{ font-size: 38px; line-height: 1.08; font-weight: normal; margin: 0 0 14px; letter-spacing: -0.01em; }}
+  h2 {{ font-size: 24px; font-weight: normal; margin: 40px 0 14px; padding-top: 10px; border-top: 1px solid #222; }}
+  .signature {{ color: #666; font-size: 14px; font-style: italic; margin: 0 0 24px; }}
+  a {{ color: #2b3f6b; }}
+  .note-bloc {{ display: grid; grid-template-columns: 300px 1fr; gap: 28px; align-items: start; }}
+  .note-bloc img {{ width: 100%; border: 1px solid #ddd; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }}
+  .but {{ margin: 0 0 14px; }}
+  .lien {{ font-size: 18px; margin-top: 18px; }}
+  .carte img {{ width: 100%; border: 1px solid #ddd; }}
+  .petit {{ font-size: 15px; color: #444; }}
+  @media (max-width: 640px) {{ .note-bloc {{ grid-template-columns: 1fr; }} h1 {{ font-size: 30px; }} }}
 </style>
 </head>
 <body>
+<p class="surtitre">Investissement public au Pérou</p>
 <h1>Grands projets d'investissement public au Pérou</h1>
-<p class="note">Projet personnel de Stanislas Sassolas, élève-ingénieur (CPE Lyon), non affilié à la DG Trésor ni à aucune administration.
-Données du {jour[8:]}/{jour[5:7]}/{jour[:4]}.</p>
+<p class="signature">Projet personnel de Stanislas Sassolas, élève-ingénieur (CPE Lyon), sans lien avec aucune
+administration. Données du {date}.</p>
 
 <p>Le ministère de l'Économie et des Finances du Pérou (MEF) publie chaque jour, en données ouvertes, la liste de ses
-investissements publics actifs (environ 150 000). Ce pipeline de données en Python archive les versions successives
-du fichier, calcule des indicateurs sur les projets de 100 millions de soles ou plus (secteur, mode de réalisation,
-budget de l'année et exécution), repère ce qui change d'une semaine à l'autre, suit les consultations de ProInversión,
-et produit une fiche de deux pages et une carte.</p>
+investissements publics actifs, environ 150 000. Ce pipeline de données en Python archive chaque version du fichier,
+calcule des indicateurs sur les projets de 100 millions de soles ou plus, repère ce qui change d'une semaine à
+l'autre, suit les consultations de ProInversión, et en tire une note et une carte.</p>
+{bloc_note}
 
-<div class="sorties">
-  <div><a href="carte.html"><img src="images/carte.png" alt="Carte des grands projets"></a>
-  <p><a href="carte.html">Carte interactive des grands projets</a></p></div>
-  <div>{bloc_fiche}</div>
-</div>
+<h2>La carte des grands projets</h2>
+<div class="carte"><a href="carte.html"><img src="images/carte.png" alt="Carte des grands projets"></a></div>
+<p><a href="carte.html">Ouvrir la carte interactive</a> : chaque cercle est un projet, sa taille suit le coût, sa
+couleur le secteur.</p>
+{lien_fiche}
 
 <h2>Méthode et limites</h2>
-<ul>
+<ul class="petit">
   <li>Le coût affiché est un coût pluriannuel indicatif, pas un engagement : l'effort de l'année se lit dans le budget
   (PIM) et la dépense exécutée (devengado).</li>
-  <li>Le fichier ne couvre que les investissements publics qui ont un code : ni les projets miniers privés, ni les
-  partenariats public-privé encore trop peu avancés pour avoir un code.</li>
+  <li>Le fichier ne couvre que l'investissement public : ni les projets miniers privés, ni le financement privé des
+  partenariats public-privé.</li>
   <li>Les contrôles de qualité (doublons, valeurs impossibles, changements de format du fichier source) et toutes les
   règles de calcul sont décrits dans le <a href="{DEPOT}">code source et sa documentation</a>.</li>
 </ul>
 
 <h2>Sources</h2>
-<p>MEF, Banco de Inversiones (données ouvertes) ; BCRP, taux de change ; ProInversión, investinperu.pe.
+<p class="petit">MEF, Banco de Inversiones (données ouvertes) ; BCRP, taux de change ; ProInversión, investinperu.pe.
 Fond de carte : © contributeurs OpenStreetMap.</p>
 </body>
 </html>
@@ -135,6 +181,7 @@ def main(arguments):
     proinversion.main()
     fiche.main()
     carte.main()
+    note.main()
     if "--publier" in arguments:
         publier()
 

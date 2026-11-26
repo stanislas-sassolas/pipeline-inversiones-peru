@@ -161,7 +161,7 @@ def encadre(grands, jour, annee):
       Taille selon le coût indicatif :<br>{reperes}<br>
       Cercle creux : ni budget {annee} ni dépense passée. Noms : intitulés du MEF, en espagnol, ou noms courts.
       <div class="source">Source : MEF, Banco de Inversiones (données ouvertes). Projet personnel,
-      non affilié à la DG Trésor.</div>
+      sans lien avec aucune administration.</div>
     </div>"""
 
 

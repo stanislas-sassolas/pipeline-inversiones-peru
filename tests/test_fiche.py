@@ -3,8 +3,6 @@
 Lancement, depuis le dossier du projet : python -m pytest
 """
 
-from datetime import date
-
 import pandas as pd
 import pytest
 
@@ -57,11 +55,31 @@ def test_nom_court_automatique_coupe_avant_le_lieu():
 
 # ---------------------------------------------------------------- règles des tableaux et encadrés
 
-def test_stade_et_colonne_et():
-    viable = pd.Series({"SITUACION": "VIABLE", "EXPEDIENTE_TECNICO": "NO"})
-    approuve = pd.Series({"SITUACION": "APROBADO", "EXPEDIENTE_TECNICO": "SI"})
-    assert fiche.stade(viable) == "viable, ET non"
-    assert (fiche.et(viable), fiche.et(approuve)) == ("non", "approuvé, ET oui")
+def test_stade_d_apres_les_phases_du_mef():
+    base = {"ETAPA_F8": "", "ETAPA_F9": "", "AVANCE_FISICO": float("nan")}
+    assert fiche.stade(pd.Series(base)) == fiche.AVANT
+    assert fiche.stade(pd.Series(base | {"ETAPA_F8": "Expediente técnico (B)"})) == fiche.ETUDES
+    assert fiche.stade(pd.Series(base | {"ETAPA_F8": "Aprobación de consistencia (A)"})) == fiche.ETUDES
+    assert fiche.stade(pd.Series(base | {"ETAPA_F8": "Ejecución física (C)"})) == fiche.TRAVAUX
+    # Un rapport de fin des travaux passe avant la phase d'exécution déclarée...
+    assert fiche.stade(pd.Series(base | {"ETAPA_F8": "Ejecución física (C)",
+                                          "ETAPA_F9": "Pendiente de liquidación"})) == fiche.CLOTURE
+    # ... mais pas s'il dit que les travaux ne sont pas finis.
+    assert fiche.stade(pd.Series(base | {"ETAPA_F8": "Ejecución física (C)",
+                                          "ETAPA_F9": "Pendiente de Culminación de ejecución de Metas fisicas"})) == fiche.TRAVAUX
+
+
+def test_colonne_des_phases_vide_arrete_le_script():
+    # Cas réel : fichiers des 20 et 23/11/2026, ETAPA_F8 vide partout.
+    vide = pd.DataFrame({"ETAPA_F8": ["", "", "Ejecución física (C)"]})
+    with pytest.raises(SystemExit):
+        fiche.verifier_phases(vide)
+    fiche.verifier_phases(pd.DataFrame({"ETAPA_F8": ["", "Ejecución física (C)", "Expediente técnico (B)"]}))
+
+
+def test_tous_les_modes_publics_ont_une_explication():
+    for mode in fiche.ind.ORDRE_MODES_PUBLICS:
+        assert mode in fiche.MODES
 
 
 def test_budget_ou_depense():
@@ -89,27 +107,104 @@ def test_lecture_absente_puis_ecrite(monkeypatch, tmp_path):
     fichier.write_text("Premier paragraphe.\n\nSecond & dernier.", encoding="utf-8")
     texte, vide = fiche.lecture()
     assert not vide
-    assert texte == '<div class="lecture"><p>Premier paragraphe.</p><p>Second &amp; dernier.</p></div>'
+    assert texte == '<p>Premier paragraphe.</p><p>Second &amp; dernier.</p>'
 
 
-def test_encadre_changements_ne_donne_que_des_totaux():
-    signaux = pd.DataFrame({"signal": [fiche.ch.NOUVEAU, fiche.ch.SORTI, fiche.ch.PIM_BAISSE],
-                            "CODIGO_UNICO": ["1", "2", "3"], "NOMBRE_INVERSION": ["A", "B", "PROJET SENSIBLE"]})
-    bilan = {"variation nette du PIM de l'année (M soles, projets suivis)": -14.0,
-             "variation nette du devengado de l'année (M soles, projets suivis)": 50.0}
-    texte = fiche.encadre_changements(signaux, bilan, rupture=False, avant=10, apres=10)
-    assert "PROJET SENSIBLE" not in texte  # aucune baisse de budget n'est nommée
-    assert "désactivation" not in texte  # le motif d'une sortie n'est pas dans le fichier
-    assert "−14 M S/" in texte and "1 entré dans le fichier" in texte
+# ---------------------------------------------------------------- note niveau « cabinet » : chiffres, titres, contrôles
+
+@pytest.mark.parametrize("part, attendu", [(0.581, "58\u00a0%"), (0.002, "0,2\u00a0%"), (0.0, "0\u00a0%"), (1.0, "100\u00a0%")])
+def test_pourcentage_jamais_zero_pour_une_petite_part(part, attendu):
+    assert fiche.pc(part) == attendu
 
 
-def test_encadre_urgences_separe_les_ioarr_du_mois():
-    df = pd.DataFrame([
-        projet("1", 1e6, "", pim=10e6, dev=5e6, IND_IOARR_EMERG="SI", FECHA_VIABILIDAD="2026-03-10 00:00:00",
-               TIPO_INVERSION="INVERSIONES IOARR", SECTEUR_FICHE=""),
-        projet("2", 1e6, "", pim=20e6, dev=0, IND_IOARR_EMERG="SI", FECHA_VIABILIDAD="2026-11-05 00:00:00",
-               TIPO_INVERSION="INVERSIONES IOARR", SECTEUR_FICHE=""),
-    ])
-    texte = fiche.encadre_urgences(df, df.iloc[0:0], date(2026, 11, 25))
-    assert "dont 20 M S/ pour des IOARR approuvées en novembre" in texte
-    assert "les autres sont exécutées à 50 %" in texte
+@pytest.mark.parametrize("soles, attendu", [(726.5e9, "727"), (20.85e9, "20,9"), (99.96e9, "100,0")])
+def test_milliards_entiers_au_dela_de_100(soles, attendu):
+    assert fiche.md(soles) == attendu
+
+
+def test_dates_au_format_iso_pas_inversees():
+    # 2027-03-05 doit rester le 5 mars, pas le 3 mai (piège de dayfirst=True).
+    g = pd.DataFrame({"FEC_INI_EJEC_FISICA": ["2027-03-05 00:00:00", "", None]})
+    d = fiche.dates_debut(g)
+    assert d.iloc[0] == pd.Timestamp(2027, 3, 5) and d.iloc[1:].isna().all()
+
+
+def petits_grands_projets():
+    """Six projets inventés, un par cas utile : stades, modes, niveaux, dates."""
+    lignes = [
+        projet("1", 30e9, "", MODE_PUBLIC="Marché public (por contrata)", ETAPA_F8="Aprobación de consistencia (A)",
+               FEC_INI_EJEC_FISICA="2027-06-01 00:00:00", SECTEUR_FICHE="Transports et télécoms", NIVEL="GN"),
+        projet("2", 20e9, "", MODE_PUBLIC="APP", ETAPA_F8="", FEC_INI_EJEC_FISICA="", SECTEUR_FICHE="Transports et télécoms",
+               NIVEL="GN"),
+        projet("3", 10e9, "", pim=2e9, dev=1e9, MODE_PUBLIC="APP", ETAPA_F8="Ejecución física (C)",
+               FEC_INI_EJEC_FISICA="2020-01-01 00:00:00", SECTEUR_FICHE="Eau et assainissement", NIVEL="GR"),
+        projet("4", 5e9, "", pim=1e9, dev=5e8, MODE_PUBLIC="Marché public (por contrata)", ETAPA_F8="Ejecución física (C)",
+               FEC_INI_EJEC_FISICA="2021-01-01 00:00:00", SECTEUR_FICHE="Santé", NIVEL="GL"),
+        projet("5", 1e9, "", MODE_PUBLIC="Marché public (por contrata)", ETAPA_F8="Expediente técnico (B)",
+               FEC_INI_EJEC_FISICA="2028-02-01 00:00:00", SECTEUR_FICHE="Santé", NIVEL="GR"),
+        projet("6", 2e8, "", MODE_PUBLIC="Régie (administration directe)", ETAPA_F8="Ejecución física (C)",
+               ETAPA_F9="Pendiente de liquidación", FEC_INI_EJEC_FISICA="2019-01-01 00:00:00",
+               SECTEUR_FICHE="Santé", NIVEL="GL"),
+    ]
+    return fiche.preparer(pd.DataFrame(lignes))
+
+
+def test_stades_et_parts_s_additionnent():
+    g = petits_grands_projets()
+    s = fiche.chiffres_par_stade(g)
+    assert s["n"].tolist() == [1, 2, 2, 1]
+    assert s["pc"].sum() == pytest.approx(1) and s["pp"].sum() == pytest.approx(1)
+    assert g["PRE"].tolist() == [True, True, False, False, True, False]
+
+
+def test_calendrier_des_projets_en_etudes():
+    from datetime import date
+    g = petits_grands_projets()
+    t, etudes, fenetre, passees = fiche.calendrier(g, date(2026, 11, 25))
+    assert len(etudes) == 2 and t["n"].sum() == 2
+    assert sorted(fenetre["CODIGO_UNICO"]) == ["1", "5"]  # début déclaré en 2027 et 2028
+    assert passees.empty
+
+
+def test_titres_recalcules_a_partir_des_donnees():
+    from datetime import date
+    g = petits_grands_projets()
+    _, etudes, fenetre, _ = fiche.calendrier(g, date(2026, 11, 25))
+    v = {"annee": 2026, "g": g, "stades": fiche.chiffres_par_stade(g), "secteurs": fiche.croisement(g, "SECTEUR_FICHE"),
+         "modes": fiche.croisement(g, "MODE_PUBLIC"), "niveaux": fiche.niveaux(g), "taille": fiche.classes_de_taille(g),
+         "n_etudes": len(etudes), "fenetre": fenetre, "t1": g[g["PRE"]].head(10), "t2": g[g["STADE"] == fiche.TRAVAUX]}
+    t = fiche.titres(v)
+    total = g["COSTO_ACTUALIZADO"].sum()
+    assert f"{fiche.md(total)} Md S/" in t["h1"]
+    assert t["g2"].startswith("Transports et télécoms : ")
+    assert "2027 ou 2028" in t["g4"] and "2 projets en études détaillées" in t["g4"]
+    assert "dont 1 en PPP" in t["t1"]
+    assert t["g3"].startswith("Marché public : ") and "PPP" in t["g3"]
+
+
+def test_controle_refuse_les_signes_et_les_jugements():
+    page = "<html><head></head><body><p>Texte — avec un tiret</p></body></html>"
+    with pytest.raises(SystemExit, match="tiret cadratin"):
+        fiche.controler(page, {})
+    with pytest.raises(SystemExit, match="jugement"):
+        fiche.controler("<head></head><body>ok</body>", {"g1": "Un retard inquiétant"})
+    with pytest.raises(SystemExit, match="IA"):
+        fiche.controler("<head></head><body>une IA</body>", {})
+    fiche.controler("<head></head><body>Pipeline de données, Pérou</body>", {"g1": "Les transports font 55 % du coût"})
+
+
+def test_typographie_ne_touche_pas_aux_attributs_svg():
+    page = '<head></head><body><svg><path d="M1,5.6 L2,4.4"/><text>727 Md S/ : 58 %</text></svg></body>'
+    resultat = fiche.typographie(page)
+    assert 'd="M1,5.6 L2,4.4"' in resultat  # le tracé reste valide
+    assert "727 Md S/ : 58 %" in resultat
+
+
+@pytest.mark.parametrize("soles, attendu", [(1.765e9, "1 765"), (4.7e5, "&lt;1"), (0, "0"), (float("nan"), "n.d.")])
+def test_millions_entiers_dans_les_tableaux(soles, attendu):
+    assert fiche.millions_entiers(soles) == attendu
+
+
+def test_controle_refuse_une_valeur_non_calculee():
+    with pytest.raises(SystemExit, match="nan"):
+        fiche.controler("<head></head><body>coût : nan %</body>", {})

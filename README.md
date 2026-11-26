@@ -1,6 +1,6 @@
 # Pipeline des grands projets d'investissement public au Pérou
 
-Projet personnel de Stanislas Sassolas (élève-ingénieur, CPE Lyon), non affilié à la DG Trésor ni à aucune administration.
+Projet personnel de Stanislas Sassolas (élève-ingénieur, CPE Lyon), sans lien avec aucune administration.
 
 [![Carte des grands projets d'investissement public au Pérou](docs/images/carte.png)](https://stanislas-sassolas.github.io/pipeline-inversiones-peru/carte.html)
 
@@ -16,7 +16,8 @@ Le ministère de l'Économie et des Finances du Pérou (MEF) publie chaque jour,
 | Indicateurs (fichier de travail) | `exports/indicateurs_<date>.xlsx` | `indicateurs.py` |
 | Ce qui a bougé (fichier de travail) | `exports/changements_<date1>_<date2>.xlsx` | `changements.py` |
 | Consultations de ProInversión (fichier de travail) | `exports/proinversion_<date>.xlsx` | `proinversion.py` |
-| Fiche de deux pages | `exports/fiche_<date>.pdf` | `fiche.py` |
+| Note de trois pages (lecture rapide) | `exports/note_<date>.pdf` | `note.py` |
+| Fiche de deux pages (tous les indicateurs) | `exports/fiche_<date>.pdf` | `fiche.py` |
 | Carte interactive | `exports/carte_<date>.html` | `carte.py` |
 | Page de démonstration | `docs/` (GitHub Pages) | `pipeline.py --publier` |
 
@@ -40,7 +41,7 @@ Le pipeline a besoin d'au moins deux archives de jours différents : le premier 
 
 Les tests tournent aussi automatiquement sur GitHub à chaque envoi (`.github/workflows/tests.yml`).
 
-Fichiers faits à la main, avec leur source quand c'est une correction : `secteurs.csv` (regroupement des fonctions en secteurs), `corrections_projets.csv` (corrections et notes par projet), `correspondance_proinversion.csv` (lien entre consultations et projets du MEF), `fiche/lecture.txt` (commentaire de la fiche, à créer : tant qu'il manque, la fiche reste un brouillon et n'est pas publiée), `fiche/noms_courts.csv` et `fiche/noms_consultations.csv` (noms courts). Le dictionnaire des colonnes du fichier du MEF est dans `dictionnaire_colonnes.md`.
+Fichiers faits à la main, avec leur source quand c'est une correction : `secteurs.csv` (regroupement des fonctions en secteurs), `corrections_projets.csv` (corrections et notes par projet), `correspondance_proinversion.csv` (lien entre consultations et projets du MEF), `fiche/lecture.txt` (texte « À retenir » de la note, 900 caractères au plus, à créer : tant qu'il manque, la note reste un brouillon et n'est pas publiée), `fiche/noms_courts.csv` et `fiche/noms_consultations.csv` (noms courts). Le dictionnaire des colonnes du fichier du MEF est dans `dictionnaire_colonnes.md`.
 
 ## Sources
 

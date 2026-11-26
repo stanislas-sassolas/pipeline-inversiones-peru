@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Deux générations de grands projets, Pérou, $mois</title>
+<style>
+$style
+</style>
+</head>
+<body>
+
+<!-- Trois pages composées une à une. Chaque page est pleine : la place libre va aux graphiques (calculée par note.py),
+     le reste aux respirations entre les parties. Un texte et son graphique sont toujours sur la même page. -->
+
+<section class="page">
+  <p class="surtitre">Investissement public au Pérou, $mois</p>
+  <h1>Deux générations de grands projets</h1>
+  <p class="chapeau">Le Pérou compte $nb projets publics de 100 millions de soles ou plus. Le budget de cette année paie surtout des chantiers déclarés viables il y a près de $age_lettres ans. Plus de la moitié du coût, environ $pre_md milliards de soles, revient à une vague plus récente, pas encore en travaux et concentrée sur quelques très gros projets, dont plusieurs trains et métros.</p>
+
+  <div class="bandeau">
+    <div><span class="grand">$nb</span><span class="legende">grands projets publics actifs</span></div>
+    <div><span class="grand">$cout</span><span class="legende">milliards de soles de coût prévu, environ $cout_usd milliards de dollars</span></div>
+    <div><span class="grand bleu">$pre_cout</span><span class="legende">de ce coût n'est pas encore en travaux</span></div>
+  </div>
+
+  <div class="respire"></div>
+  <h2>Le budget de l'année va aux chantiers</h2>
+  <p class="lettrine">Chaque jour, le ministère de l'Économie et des Finances (MEF) publie la liste de tous les investissements publics actifs au Pérou, soit environ $nb_complet lignes. Les $nb projets d'au moins 100 millions de soles n'en sont qu'une petite fraction, mais ils concentrent $part_complet du coût total.</p>
+  <p>Ce montant couvre toute la vie des projets. Pour l'année, ils disposent d'un budget $annee de $budget milliards de soles, réparti tout autrement. Ceux qui ne sont pas encore en travaux représentent plus de la moitié du coût, mais reçoivent moins d'un dixième de ce budget. Le programme multiannuel $an1-$an3 leur réserve $pre_programme des montants inscrits.</p>
+
+  <div class="respire"></div>
+  <figure>
+    <div class="panneau">
+      <p class="titre-graphique">Trois façons de mesurer les mêmes $nb projets</p>
+      $graphique_1
+    </div>
+    <figcaption>En bleu, les projets pas encore en travaux ; en gris, les chantiers ouverts ; en gris clair, les projets en clôture.</figcaption>
+  </figure>
+  <p class="folio">1/3</p>
+</section>
+
+<section class="page">
+  <h2 class="premier">Une vague plus récente</h2>
+  <p>Cet écart recoupe l'âge des projets. Chaque projet est daté du jour où il a été déclaré viable, c'est-à-dire où son étude de préinvestissement a été approuvée. Pour les chantiers en cours, cette date remonte à près de $age_lettres ans en médiane. Pour la vague suivante, elle remonte à moins de $age_pre_lettres ans, et $part_recente du coût a été déclaré viable depuis janvier $debut_vague.</p>
+
+  <div class="respire"></div>
+  <figure>
+    <div class="panneau">
+      <p class="titre-graphique">Coût des grands projets selon l'année où ils ont été déclarés viables</p>
+      $graphique_2
+    </div>
+    <figcaption>Le gris des chantiers vient surtout des années 2012 à 2020, le bleu de la vague suivante des années récentes. Les projets déjà clôturés ne sont plus dans le fichier.</figcaption>
+  </figure>
+  <p>Les déclarations se poursuivent : du 1er janvier au $annee_dernier_long, $annee_n grands projets ont été déclarés viables, pour $annee_cout milliards de soles.</p>
+
+  <div class="respire"></div>
+  <h2>Marché public ou partenariat public-privé</h2>
+  <p>Les partenariats public-privé (PPP) représentent $ppp_travaux du coût des chantiers en cours et $ppp_pre de celui de la vague à venir, avec plusieurs des plus gros projets. Le marché public reste majoritaire, avec surtout des projets moyens : $marche_median millions de soles en médiane, environ $marche_median_usd millions de dollars, contre $ppp_median millions pour les PPP. Pour les projets dont la date de début inscrite tombe en $an1 ou $an2, il représente $marche_datees du coût.</p>
+  <p class="folio">2/3</p>
+</section>
+
+<section class="page">
+  <h2 class="premier">Onze projets, près de la moitié de la vague</h2>
+  <p>Dans la vague à venir, les $gros_lettres projets de 5 milliards de soles ou plus font à eux seuls $gros_part du coût. $rail_gros_Lettres d'entre eux sont des trains ou des lignes de métro, $gros_ppp_lettres sont des PPP, et $gros_sans_lettres n'ont ni budget cette année ni dépense passée. Au total, les projets ferroviaires pas encore en travaux pèsent $rail_pre_md milliards de soles, $rail_pre_part de la vague, pour $rail_pre_depense millions de soles dépensés à ce jour.</p>
+
+  <figure>
+    <table class="projets" style="--ligne: $ligne">
+      <tr><th>Projet</th><th class="n">Coût (Md S/)</th><th>Mode</th><th class="n">Viable en</th><th class="n">Dépensé (M S/)</th></tr>
+      $tableau
+    </table>
+    <figcaption>Les $gros_lettres projets de la vague à venir qui coûtent 5 milliards de soles ou plus. Un milliard de soles vaut environ $md_usd millions de dollars. Dépensé : dépense publique cumulée ; « aucun » : ni dépense ni budget $annee. La part privée des PPP n'est pas dans le fichier.</figcaption>
+  </figure>
+
+  <div class="respire"></div>
+  <div class="retenir">
+    <h2>À retenir</h2>
+    <p>Les chantiers en cours, déclarés viables pour la plupart entre 2012 et 2020, reçoivent $travaux_budget du budget de l'année. La vague suivante, pas encore en travaux, représente $pre_cout du coût, et onze projets, dont $rail_gros_lettres trains ou lignes de métro, en font près de la moitié. Elle relève surtout du marché public, mais les partenariats public-privé y pèsent $ppp_facteur que dans les chantiers d'aujourd'hui.</p>
+  </div>
+
+  <div class="pied">
+    <p>Source : MEF, Banco de Inversiones, fichier ouvert DETALLE_INVERSIONES du $date ; calculs de l'auteur. Grands projets : coût prévu d'au moins 100 millions de soles, doublons retirés. Stade d'après les phases déclarées au MEF ; « pas encore en travaux » réunit les projets avant exécution et en études détaillées. Pour les rares projets sans étude de préinvestissement, la date de viabilité est une date d'approbation. Coûts pluriannuels et indicatifs ; budget, dépense et programme ne couvrent que les crédits publics. 1 US$$ = $taux S/ ($periode_taux, BCRP).</p>
+    <p>Note produite par un pipeline de données en Python. Stanislas Sassolas, élève-ingénieur à CPE Lyon, projet personnel. Méthode et code : <span style="white-space:nowrap">stanislas-sassolas.github.io/pipeline-inversiones-peru</span></p>
+  </div>
+  <p class="folio">3/3</p>
+</section>
+
+</body>
+</html>

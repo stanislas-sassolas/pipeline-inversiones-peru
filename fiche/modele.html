@@ -2,129 +2,185 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<title>Grands projets d'investissement public au Pérou, $mois</title>
+<title>Pérou, grands projets d'investissement public, $mois</title>
 <style>
-  @page { size: A4; margin: 11mm 12mm 10mm; }
-  body { font-family: Arial, Helvetica, sans-serif; font-size: 9pt; line-height: 1.32; color: #1a1a1a; margin: 0; }
-  .page { page-break-after: always; }
-  .page:last-child { page-break-after: auto; }
-  .bandeau { font-size: 7.6pt; color: #555; border-bottom: 1.2px solid #1f3a5f; padding-bottom: 2px; margin-bottom: 6px;
-             display: flex; justify-content: space-between; }
-  .bandeau .brouillon { color: #b00; font-weight: bold; }
-  h1 { font-size: 14pt; color: #1f3a5f; margin: 0 0 2px; }
-  .sous-titre { color: #444; margin: 0 0 7px; }
-  h2 { font-size: 9.8pt; color: #1f3a5f; margin: 10px 0 3px; border-bottom: 1px solid #c9d3df; padding-bottom: 1px; }
-  p { margin: 0 0 4px; text-align: left; }
-  .chiffres { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 4px 0 6px; }
-  .chiffre { border: 1px solid #c9d3df; border-radius: 3px; padding: 4px 6px; background: #f6f8fb; }
-  .chiffre .valeur { font-size: 13pt; font-weight: bold; color: #1f3a5f; }
-  .chiffre .legende { font-size: 7.6pt; color: #333; }
-  .lecture { border-left: 3px solid #1f3a5f; background: #f6f8fb; padding: 4px 8px; margin: 4px 0 2px; }
-  .lecture.vide { color: #555; font-style: italic; }
-  table { border-collapse: collapse; width: 100%; margin: 2px 0 3px; }
-  table.fixe { table-layout: fixed; }
-  th { text-align: left; font-weight: bold; color: #1f3a5f; border-bottom: 1px solid #1f3a5f; padding: 2px 4px; font-size: 7.8pt; }
-  td { padding: 1.8px 4px; border-bottom: 1px solid #e3e8ee; vertical-align: top; }
-  td.n, th.n { text-align: right; white-space: nowrap; }
-  td.nw { white-space: nowrap; }
-  td.code { color: #555; white-space: nowrap; }
-  tr.total td { font-weight: bold; border-top: 1px solid #1f3a5f; border-bottom: none; }
-  .barre { position: relative; height: 8px; min-width: 110px; margin-top: 1.5px; }
-  .barre .finance { position: absolute; left: 0; top: 0; height: 8px; background: #1f3a5f; }
-  .barre .jamais { position: absolute; top: 0; height: 8px; background: #7d93ad; }
-  .cle { font-size: 7.4pt; color: #444; margin-top: 1px; }
-  .cle span { display: inline-block; width: 9px; height: 7px; margin: 0 3px 0 8px; vertical-align: middle; }
-  .cle span.finance { background: #1f3a5f; }
-  .cle span.jamais { background: #7d93ad; }
-  .deux { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .encadre { border: 1px solid #c9d3df; border-radius: 3px; padding: 4px 7px 5px; }
-  .encadre h2 { margin-top: 2px; border-bottom: none; padding-bottom: 0; }
-  .petit { font-size: 7.6pt; color: #333; }
-  ul { margin: 2px 0 3px 14px; padding: 0; }
-  li { margin: 0 0 1.5px; }
-  .sources { font-size: 7.2pt; color: #444; border-top: 1px solid #bbb; padding-top: 3px; margin-top: 8px; }
-  .sources p { margin: 0 0 2px; }
+  @page { size: A4; margin: 12mm; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { font-family: Arial, "Liberation Sans", Helvetica, sans-serif; font-size: 8pt; line-height: 1.3; color: #1A1A1A; margin: 0; }
+  .page { break-after: page; }
+  .page:last-child { break-after: auto; }
+  .bloc { break-inside: avoid; margin-bottom: 3mm; }
+
+  /* En-tête courant */
+  .entete { display: flex; justify-content: space-between; font-size: 6.6pt; letter-spacing: 0.05em; text-transform: uppercase;
+            color: #4D4D4D; border-bottom: 0.75pt solid #0B1F33; padding-bottom: 1mm; margin-bottom: 3mm; }
+  .entete .brouillon { color: #B00020; font-weight: bold; }
+
+  h1 { font-size: 15pt; line-height: 1.17; color: #0B1F33; margin: 0 0 1.6mm; font-weight: bold; }
+  .chapeau { font-size: 7.8pt; color: #333333; margin: 0 0 3mm; }
+
+  /* Titres-messages */
+  .titre { font-size: 9pt; font-weight: bold; line-height: 1.25; margin: 0 0 1.4mm; }
+  .titre .num { color: #1F4E79; }
+  .note { font-size: 6.4pt; line-height: 1.28; color: #6B6B6B; margin: 1mm 0 0; }
+  .note b { color: #4D4D4D; }
+
+  /* Synthèse : À retenir et chiffres clés */
+  .synthese { display: grid; grid-template-columns: 122.6mm 59.4mm; column-gap: 4mm; }
+  .retenir { background: #F3F6F9; border-left: 2pt solid #1F4E79; padding: 2.4mm 3mm; height: 46mm; overflow: hidden; font-size: 8.2pt; line-height: 1.34; }
+  .retenir .etiquette { font-size: 6.6pt; letter-spacing: 0.06em; text-transform: uppercase; color: #1F4E79; font-weight: bold; margin-bottom: 1.2mm; }
+  .retenir p { margin: 0 0 1.6mm; }
+  .retenir p.vide { color: #6B6B6B; font-style: italic; }
+  .chiffres { display: flex; flex-direction: column; justify-content: space-between; height: 46mm; }
+  .chiffre { border-top: 0.5pt solid #CCCCCC; padding-top: 1mm; }
+  .chiffre:first-child { border-top: none; padding-top: 0; }
+  .chiffre .valeur { font-size: 13pt; font-weight: bold; color: #0B1F33; line-height: 1.1; }
+  .chiffre .valeur.ocre { color: #8F4E14; }
+  .chiffre .legende { font-size: 6.7pt; line-height: 1.25; color: #333333; }
+
+  /* Légendes de couleurs */
+  .cle { font-size: 6.6pt; color: #4D4D4D; margin: 0.6mm 0 0; }
+  .cle-item { margin-right: 3.5mm; white-space: nowrap; }
+  .carre { display: inline-block; vertical-align: -0.2mm; margin-right: 1mm; }
+
+  /* Graphiques-tableaux (secteurs, modes) et tableaux de projets */
+  table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+  th { font-size: 6.3pt; font-weight: bold; color: #4D4D4D; text-align: left; vertical-align: bottom;
+       border-bottom: 0.75pt solid #0B1F33; padding: 0 1.2mm 0.6mm 0; line-height: 1.15; }
+  td { padding: 0.3mm 1.2mm 0.3mm 0; border-bottom: 0.4pt solid #E6E6E6; vertical-align: middle; font-size: 6.9pt; line-height: 1.2; }
+  th.n, td.n { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  td.ocre { color: #8F4E14; }
+  td.code { color: #6B6B6B; font-size: 6.3pt; }
+  td.passee { color: #8A8A8A; }
+  .vide { visibility: hidden; }
+  tr.fort td { font-weight: bold; }
+  td .nom { display: block; font-weight: bold; }
+  td .def { display: block; font-size: 6.1pt; color: #6B6B6B; font-weight: normal; }
+  svg.graphique { display: block; overflow: visible; }
+  .barre-ocre { display: inline-block; height: 1.6mm; background: #B5651D; margin-right: 1.2mm; vertical-align: 0.1mm; }
+
+  .deux { display: grid; column-gap: 4mm; }
+  .suivre { border-top: 0.75pt solid #1F4E79; padding-top: 1.2mm; font-size: 6.8pt; line-height: 1.3; }
+  .suivre .etiquette { font-size: 6.6pt; letter-spacing: 0.06em; text-transform: uppercase; color: #1F4E79; font-weight: bold; margin-bottom: 0.8mm; }
+  .suivre ul { margin: 0; padding-left: 3mm; }
+  .suivre li { margin: 0 0 0.6mm; }
+  .suivre li.sous { list-style: circle; margin-left: 3mm; }
+
+  .pied { columns: 3; column-gap: 4mm; font-size: 6pt; line-height: 1.28; color: #4D4D4D; border-top: 0.5pt solid #CCCCCC; padding-top: 1.2mm; }
+  .pied p { margin: 0 0 1mm; break-inside: avoid; }
 </style>
 </head>
 <body>
 
-<div class="page">
-  <div class="bandeau"><span>Pipeline de données, Banco de Inversiones du MEF (Pérou)$mention_brouillon</span><span>Projet personnel, non affilié à la DG Trésor ni à aucune administration</span></div>
-  <h1>Les grands projets d'investissement public au Pérou</h1>
-  <p class="sous-titre">Projets de 100 millions de soles ou plus, d'après le fichier public du ministère de l'Économie et des Finances (MEF) du $date_donnees. Montants en soles (S/) ; 1 US$$ = $taux S/ ($periode_taux, BCRP).</p>
+<section class="page">
+  <div class="entete"><span>Pérou · Grands projets d'investissement public · Données au $date$mention_brouillon</span><span>Projet personnel d'un élève-ingénieur · 1/2</span></div>
+  <h1>$titre_h1</h1>
+  <p class="chapeau">$chapeau</p>
 
-  <div class="chiffres">
-    <div class="chiffre"><div class="valeur">$nb_projets</div><div class="legende">grands projets actifs</div></div>
-    <div class="chiffre"><div class="valeur">$cout_total Md S/</div><div class="legende">coût total pluriannuel indicatif (environ $cout_usd Md US$$)</div></div>
-    <div class="chiffre"><div class="valeur">$part_jamais %</div><div class="legende">de ce coût porte sur $nb_jamais projets sans budget $annee ni dépense passée</div></div>
-    <div class="chiffre"><div class="valeur">$pim Md S/</div><div class="legende">budget $annee (PIM), exécuté à $taux_exec % au $date_donnees_court ; $part_pim % du budget d'investissement de tout le fichier</div></div>
-  </div>
-
-  <h2>Lecture</h2>
-  $lecture
-
-  <h2>Par secteur</h2>
-  <table class="fixe">
-    <colgroup><col style="width:31%"><col style="width:8%"><col style="width:10%"><col style="width:28%"><col style="width:14%"><col style="width:9%"></colgroup>
-    <tr><th>Secteur</th><th class="n">Projets</th><th class="n">Coût (Md S/)</th><th>Coût : avec / sans budget ni dépense</th><th class="n">Budget $annee (M S/)</th><th class="n">Exécuté</th></tr>
-    $lignes_secteurs
-  </table>
-  <div class="cle">Longueur de barre proportionnelle au coût du secteur :<span class="finance"></span>projets ayant un budget $annee ou une dépense passée<span class="jamais"></span>projets sans budget $annee ni dépense passée.</div>
-
-  <h2>Par mode de réalisation</h2>
-  <p class="petit">Un projet peut déclarer plusieurs modes ; il est compté une seule fois, sous le montage le plus spécifique déclaré (APP d'abord, marché public et régie en dernier). « Autres montages » : accords spécifiques entre administrations, comités de bénéficiaires, conventions.</p>
-  <table class="fixe">
-    <colgroup><col style="width:31%"><col style="width:8%"><col style="width:10%"><col style="width:28%"><col style="width:14%"><col style="width:9%"></colgroup>
-    <tr><th>Mode principal déclaré</th><th class="n">Projets</th><th class="n">Coût (Md S/)</th><th class="n">Part du coût</th><th class="n">Budget $annee (M S/)</th><th class="n">Exécuté</th></tr>
-    $lignes_modes
-  </table>
-
-  <div class="encadre" style="margin-top: 8px;">
-    <h2>Urgences, reconstruction et prévention</h2>
-    $encadre_urgences
-  </div>
-</div>
-
-<div class="page">
-  <div class="bandeau"><span>Les grands projets d'investissement public au Pérou, $mois ; projet personnel, non affilié à la DG Trésor$mention_brouillon</span><span>2/2</span></div>
-
-  <h2>Les 15 projets au coût le plus élevé</h2>
-  <table class="fixe">
-    <colgroup><col style="width:8%"><col style="width:41%"><col style="width:11%"><col style="width:5%"><col style="width:10%"><col style="width:13%"><col style="width:12%"></colgroup>
-    <tr><th>Code</th><th>Projet</th><th>Secteur</th><th>ET</th><th class="n">Coût<br>(Md S/)</th><th class="n">Budget $annee<br>(M S/)</th><th>Budget ou<br>dépense</th></tr>
-    $lignes_top
-  </table>
-  <div class="cle">$note_viables Code : code unique d'investissement du MEF. ET : expediente técnico enregistré (plans et devis détaillés, préalables aux travaux). Budget ou dépense : oui si le projet a un budget $annee ou une dépense depuis son lancement ; le financement privé des APP n'apparaît pas dans ce fichier.</div>
-
-  <div class="deux" style="margin-top: 8px;">
-    <div>
-      <div class="encadre">
-        <h2>Ferroviaire et métro</h2>
-        $encadre_rail
-      </div>
-      <div class="encadre" style="margin-top: 6px;">
-        <h2>Par niveau de gouvernement</h2>
-        $encadre_niveaux
+  <div class="bloc">
+    <div class="synthese">
+      <div class="retenir"><div class="etiquette">À retenir</div>$lecture</div>
+      <div class="chiffres">
+        <div class="chiffre"><div class="valeur">$k1</div><div class="legende">$k1_legende</div></div>
+        <div class="chiffre"><div class="valeur ocre">$k2</div><div class="legende">$k2_legende</div></div>
+        <div class="chiffre"><div class="valeur">$k3</div><div class="legende">$k3_legende</div></div>
+        <div class="chiffre"><div class="valeur">$k4</div><div class="legende">$k4_legende</div></div>
       </div>
     </div>
+    <p class="note">$note_chiffres</p>
+  </div>
+
+  <div class="bloc">
+    <p class="titre"><span class="num">Graphique 1.</span> $titre_g1</p>
+    $g1
+    $cle_g1
+    <p class="note">$note_g1 <b>Source :</b> MEF, Banco de Inversiones, fichier DETALLE_INVERSIONES du $date ; calculs de l'auteur.</p>
+  </div>
+
+  <div class="bloc">
+    <p class="titre"><span class="num">Graphique 2.</span> $titre_g2</p>
+    <table>
+      <colgroup><col style="width:47mm"><col style="width:76mm"><col style="width:13mm"><col style="width:17mm"><col style="width:18mm"><col style="width:15mm"></colgroup>
+      <tr><th>Secteur</th><th>Coût prévu par stade (Md S/), couleurs du graphique 1</th><th class="n">Projets</th><th class="n">Pas encore<br>en travaux</th><th class="n">Budget $annee<br>(M S/)</th><th class="n">Part du<br>budget</th></tr>
+      $lignes_g2
+    </table>
+    <p class="note">$note_g2 <b>Source :</b> MEF, DETALLE_INVERSIONES du $date ; calculs de l'auteur.</p>
+  </div>
+
+  <div class="bloc">
+    <p class="titre"><span class="num">Graphique 3.</span> $titre_g3</p>
+    <table>
+      <colgroup><col style="width:47mm"><col style="width:76mm"><col style="width:13mm"><col style="width:17mm"><col style="width:18mm"><col style="width:15mm"></colgroup>
+      <tr><th>Mode de réalisation</th><th>Coût prévu par stade (Md S/), même échelle</th><th class="n">Projets</th><th class="n">Pas encore<br>en travaux</th><th class="n">Budget $annee<br>(M S/)</th><th class="n">Part du<br>budget</th></tr>
+      $lignes_g3
+    </table>
+    <p class="note">$note_g3 <b>Source :</b> MEF, DETALLE_INVERSIONES du $date ; calculs de l'auteur.</p>
+  </div>
+</section>
+
+<section class="page">
+  <div class="entete"><span>Pérou · Grands projets d'investissement public · Données au $date$mention_brouillon</span><span>Projet personnel d'un élève-ingénieur · 2/2</span></div>
+
+  <div class="bloc deux" style="grid-template-columns: 104mm 78mm;">
     <div>
-      <div class="encadre">
-        <h2>Évolution du $date_ancienne au $date_recente</h2>
-        $encadre_changements
-      </div>
-      <div class="encadre" style="margin-top: 6px;">
-        <h2>ProInversión : consultations en cours</h2>
-        $encadre_proinversion
-      </div>
+      <p class="titre"><span class="num">Graphique 4.</span> $titre_g4</p>
+      $g4
+      <p class="note">$note_g4 Coût en Md S/. <b>Source :</b> MEF, $date ; calculs de l'auteur.</p>
+    </div>
+    <div>
+      <p class="titre"><span class="num">Graphique 5.</span> $titre_g5</p>
+      $g5
+      $cle_g5
+      <p class="note">$note_g5 <b>Source :</b> MEF, $date ; calculs de l'auteur.</p>
     </div>
   </div>
 
-  <div class="sources">
-    <p><b>Sources.</b> MEF, Banco de Inversiones, fichier DETALLE_INVERSIONES (données ouvertes, copies datées archivées depuis le 13/11/2026) ; BCRP, série PN01207PM ; ProInversión, investinperu.pe, consulté le $date_proinversion. Fiche produite par un pipeline de données en Python ; Stanislas Sassolas, élève-ingénieur (CPE Lyon).</p>
-    <p><b>Méthode et limites.</b> Le coût est le coût actualisé du MEF augmenté du contrôle concomitant de la Contraloría, que le MEF publie dans une colonne à part (sauf dans ses fichiers des 20 et 23/11/2026, où il l'avait inclus dans le coût) : toutes les dates sont ainsi comparables. C'est un coût pluriannuel indicatif, pas un engagement : l'effort de l'année se lit dans le budget (PIM) et la dépense exécutée (devengado). Le taux d'exécution est le rapport des sommes (devengado / PIM), partiel jusqu'en décembre. Secteurs : regroupement de la classification fonctionnelle du MEF. Le fichier ne contient que l'investissement public actif : il ne couvre ni les projets miniers privés, ni les APP encore en préparation sans code d'investissement.</p>
-    <p><b>Sigles.</b> PIM : budget de l'année après modifications (Presupuesto Institucional Modificado) ; devengado : dépense liquidée, après service fait ; APP : partenariat public-privé ; OxI : travaux contre impôts (une entreprise finance l'ouvrage et l'impute sur son impôt sur le revenu) ; IOARR : petits investissements d'optimisation, d'agrandissement marginal, de remplacement ou de réhabilitation ; IRI : interventions de reconstruction (loi 30556) ; IEC : initiative d'État cofinancée (APP) ; BCRP : banque centrale du Pérou.</p>
+  <div class="bloc">
+    <p class="titre"><span class="num">Tableau 1.</span> $titre_t1</p>
+    <table>
+      <colgroup><col style="width:11mm"><col style="width:57mm"><col style="width:16mm"><col style="width:22mm"><col style="width:23mm"><col style="width:12mm"><col style="width:14mm"><col style="width:17mm"><col style="width:12mm"></colgroup>
+      <tr><th>Code</th><th>Projet</th><th>Secteur</th><th>Mode</th><th>Stade</th><th class="n">Coût<br>(Md S/)</th><th class="n">Budget<br>$annee (M S/)</th><th class="n">Programmé<br>$an1-$an3 (M S/)</th><th class="n">Début<br>inscrit</th></tr>
+      $lignes_t1
+    </table>
+    <p class="note">$note_t1 <b>Source :</b> MEF, $date ; calculs de l'auteur.</p>
   </div>
-</div>
+
+  <div class="bloc">
+    <p class="titre"><span class="num">Tableau 2.</span> $titre_t2</p>
+    <table>
+      <colgroup><col style="width:11mm"><col style="width:66mm"><col style="width:16mm"><col style="width:24mm"><col style="width:12mm"><col style="width:27mm"><col style="width:16mm"><col style="width:14mm"></colgroup>
+      <tr><th>Code</th><th>Projet</th><th>Secteur</th><th>Mode</th><th class="n">Coût<br>(Md S/)</th><th class="n">Budget $annee<br>(M S/)</th><th class="n">Programmé<br>$an1 (M S/)</th><th class="n">Avancement<br>déclaré</th></tr>
+      $lignes_t2
+    </table>
+    <p class="note">$note_t2 <b>Source :</b> MEF, $date ; calculs de l'auteur.</p>
+  </div>
+
+  <div class="bloc deux" style="grid-template-columns: 91mm 91mm;">
+    <div>
+      <p class="titre"><span class="num">Graphique 6.</span> $titre_g6</p>
+      $g6
+      $cle_g6
+      <p class="note">Niveau de l'entité qui porte le projet (colonne NIVEL du MEF). <b>Source :</b> MEF, $date ; calculs de l'auteur.</p>
+    </div>
+    <div class="suivre">
+      <div class="etiquette">Pour suivre un projet</div>
+      <ul>
+        <li>Fiche d'un projet : consultation des investissements du MEF (Invierte.pe), avec le code CUI.</li>
+        <li>Marchés publics (études, travaux, supervision) : SEACE, la plateforme des achats de l'État.</li>
+        $proinversion
+        <li>Ce sont des marchés de conseil, pas les appels d'offres des PPP.</li>
+        <li>Carte et méthode : stanislas-sassolas.github.io/pipeline-inversiones-peru</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="pied">
+    <p><b>Sources.</b> MEF, Banco de Inversiones, fichier DETALLE_INVERSIONES (données ouvertes), version du $date, archivée chaque jour depuis le 13/11/2026 ; BCRP, série PN01207PM ($periode_taux : 1 US$$ = $taux3 S/) ; ProInversión, investinperu.pe, consulté le $date_proinversion.</p>
+    <p><b>Méthode et limites.</b> Investissements publics actifs de 100 M S/ ou plus, doublons de code retirés. Coût = coût actualisé + contrôle de la Contraloría (organe de contrôle de l'État), publié à part par le MEF. Stade d'après les formatos 8 et 9 ; un seul mode par projet. Coûts pluriannuels indicatifs ; dépense de l'année partielle jusqu'en décembre. Le fichier ne contient ni les projets privés (mines), ni les PPP autofinancés. Totaux arrondis.</p>
+    <p><b>Mots du MEF.</b> Budget de l'année : PIM ; dépense : devengado ; études détaillées : expediente técnico ; CUI : code unique d'investissement ; programme multiannuel : PMI ; PPP : APP en espagnol (asociación público-privada) ; travaux contre impôts : obras por impuestos. Note produite par un pipeline de données en Python ; Stanislas Sassolas, élève-ingénieur (CPE Lyon), projet personnel sans lien avec aucune administration.</p>
+  </div>
+</section>
 
 </body>
 </html>
