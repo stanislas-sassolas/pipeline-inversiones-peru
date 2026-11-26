@@ -88,7 +88,6 @@ def publier():
 
 def page_accueil(jour, note_publiee, fiche_publiee):
     """Page d'accueil du site : la note et son but d'abord, puis la carte, la méthode et les sources."""
-    date = f"{jour[8:]}/{jour[5:7]}/{jour[:4]}"
     bloc_note = ("""
 <h2>La note : deux générations de grands projets</h2>
 <div class="note-bloc">
@@ -120,7 +119,6 @@ def page_accueil(jour, note_publiee, fiche_publiee):
   .surtitre {{ font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #2b3f6b; margin: 0 0 10px; }}
   h1 {{ font-size: 38px; line-height: 1.08; font-weight: normal; margin: 0 0 14px; letter-spacing: -0.01em; }}
   h2 {{ font-size: 24px; font-weight: normal; margin: 40px 0 14px; padding-top: 10px; border-top: 1px solid #222; }}
-  .signature {{ color: #666; font-size: 14px; font-style: italic; margin: 0 0 24px; }}
   a {{ color: #2b3f6b; }}
   .note-bloc {{ display: grid; grid-template-columns: 300px 1fr; gap: 28px; align-items: start; }}
   .note-bloc img {{ width: 100%; border: 1px solid #ddd; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }}
@@ -134,8 +132,6 @@ def page_accueil(jour, note_publiee, fiche_publiee):
 <body>
 <p class="surtitre">Investissement public au Pérou</p>
 <h1>Grands projets d'investissement public au Pérou</h1>
-<p class="signature">Projet personnel de Stanislas Sassolas, élève-ingénieur (CPE Lyon), sans lien avec aucune
-administration. Données du {date}.</p>
 
 <p>Le ministère de l'Économie et des Finances du Pérou (MEF) publie chaque jour, en données ouvertes, la liste de ses
 investissements publics actifs, environ 150 000. Ce pipeline de données en Python archive chaque version du fichier,
