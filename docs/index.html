@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grands projets d'investissement public au Pérou</title>
+<style>
+  body { font: 16px/1.55 Arial, Helvetica, sans-serif; color: #1a1a1a; max-width: 860px; margin: 0 auto; padding: 24px 16px; }
+  h1 { color: #1f3a5f; font-size: 26px; margin-bottom: 4px; }
+  h2 { color: #1f3a5f; font-size: 19px; margin-top: 28px; }
+  .note { color: #555; font-size: 14px; }
+  .sorties { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .sorties img { width: 100%; border: 1px solid #ccc; }
+  @media (max-width: 640px) { .sorties { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<h1>Grands projets d'investissement public au Pérou</h1>
+<p class="note">Projet personnel de Stanislas Sassolas, élève-ingénieur (CPE Lyon), non affilié à la DG Trésor ni à aucune administration.
+Données du 25/11/2026.</p>
+
+<p>Le ministère de l'Économie et des Finances du Pérou (MEF) publie chaque jour, en données ouvertes, la liste de ses
+investissements publics actifs (environ 150 000). Ce pipeline de données en Python archive les versions successives
+du fichier, calcule des indicateurs sur les projets de 100 millions de soles ou plus (secteur, mode de réalisation,
+budget de l'année et exécution), repère ce qui change d'une semaine à l'autre, suit les consultations de ProInversión,
+et produit une fiche de deux pages et une carte.</p>
+
+<div class="sorties">
+  <div><a href="carte.html"><img src="images/carte.png" alt="Carte des grands projets"></a>
+  <p><a href="carte.html">Carte interactive des grands projets</a></p></div>
+  <div><p>La fiche de deux pages est en préparation.</p></div>
+</div>
+
+<h2>Méthode et limites</h2>
+<ul>
+  <li>Le coût affiché est un coût pluriannuel indicatif, pas un engagement : l'effort de l'année se lit dans le budget
+  (PIM) et la dépense exécutée (devengado).</li>
+  <li>Le fichier ne couvre que les investissements publics qui ont un code : ni les projets miniers privés, ni les
+  partenariats public-privé encore trop peu avancés pour avoir un code.</li>
+  <li>Les contrôles de qualité (doublons, valeurs impossibles, changements de format du fichier source) et toutes les
+  règles de calcul sont décrits dans le <a href="https://github.com/stanislas-sassolas/pipeline-inversiones-peru">code source et sa documentation</a>.</li>
+</ul>
+
+<h2>Sources</h2>
+<p>MEF, Banco de Inversiones (données ouvertes) ; BCRP, taux de change ; ProInversión, investinperu.pe.
+Fond de carte : © contributeurs OpenStreetMap.</p>
+</body>
+</html>

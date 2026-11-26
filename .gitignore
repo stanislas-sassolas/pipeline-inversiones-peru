@@ -1,0 +1,14 @@
+data/
+*.parquet
+*.csv
+*.log
+__pycache__/
+.venv/
+exports/
+!secteurs.csv
+!corrections_projets.csv
+!correspondance_proinversion.csv
+!noms_courts.csv
+!noms_consultations.csv
+.pytest_cache/
+*.xlsx

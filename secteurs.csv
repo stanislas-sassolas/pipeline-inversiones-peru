@@ -1,0 +1,36 @@
+FUNCION;PROGRAMA;SECTEUR
+*;GESTIÓN DE RIESGOS Y EMERGENCIAS;Prévention des risques
+*;DEFENSA CONTRA SINIESTROS;Prévention des risques
+*;CIENCIA Y TECNOLOGÍA;Éducation, recherche, culture et sport
+TRANSPORTE;*;Transports et télécoms
+COMUNICACIONES;*;Transports et télécoms
+SANEAMIENTO;*;Eau et assainissement
+SALUD Y SANEAMIENTO;SANEAMIENTO;Eau et assainissement
+SALUD Y SANEAMIENTO;*;Santé
+SALUD;*;Santé
+EDUCACIÓN;*;Éducation, recherche, culture et sport
+EDUCACION Y CULTURA;*;Éducation, recherche, culture et sport
+CULTURA Y DEPORTE;*;Éducation, recherche, culture et sport
+AGROPECUARIA;*;Agriculture, irrigation et pêche
+AGRARIA;*;Agriculture, irrigation et pêche
+PESCA;*;Agriculture, irrigation et pêche
+ORDEN PÚBLICO Y SEGURIDAD;*;Administration, justice et sécurité
+JUSTICIA;*;Administration, justice et sécurité
+DEFENSA Y SEGURIDAD NACIONAL;*;Administration, justice et sécurité
+PLANEAMIENTO, GESTIÓN Y RESERVA DE CONTINGENCIA;*;Administration, justice et sécurité
+ADMINISTRACION Y PLANEAMIENTO;*;Administration, justice et sécurité
+RELACIONES EXTERIORES;*;Administration, justice et sécurité
+TRABAJO;*;Administration, justice et sécurité
+LEGISLATIVA;*;Administration, justice et sécurité
+ENERGÍA;*;Énergie, environnement et autres
+ENERGIA Y RECURSOS MINERALES;*;Énergie, environnement et autres
+AMBIENTE;*;Énergie, environnement et autres
+VIVIENDA Y DESARROLLO URBANO;*;Énergie, environnement et autres
+TURISMO;*;Énergie, environnement et autres
+COMERCIO;*;Énergie, environnement et autres
+INDUSTRIA, COMERCIO Y SERVICIOS;*;Énergie, environnement et autres
+INDUSTRIA;*;Énergie, environnement et autres
+PROTECCIÓN SOCIAL;*;Énergie, environnement et autres
+ASISTENCIA Y PREVISION SOCIAL;*;Énergie, environnement et autres
+PREVISIÓN SOCIAL;*;Énergie, environnement et autres
+OTROS;*;Énergie, environnement et autres
