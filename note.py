@@ -31,10 +31,41 @@ from fiche import C, PIM, e, fr, md, pc
 DOSSIER = Path(__file__).parent / "note"
 PAGES_MAX = 3
 
-# Couleurs : un bleu nuit pour la vague à venir (le sujet de la note), des gris chauds pour le reste, un ocre pour les PPP.
-BLEU, GRIS, GRIS_CLAIR, OCRE = "#2b3f6b", "#9c968a", "#d9d4c8", "#b5651d"
-ENCRE, ENCRE_DOUCE = "#1a1a1a", "#6b665c"
-CREME = "#f7f4ec"
+# Couleurs, en un seul endroit : les graphiques (SVG) et la feuille de style (variables CSS) les lisent ici.
+# Une couleur franche pour ce que la note montre (la vague à venir), sa version claire pour les chantiers, un gris
+# légèrement teinté pour le marginal (projets en clôture), un gris foncé pour le texte secondaire, un filet presque
+# invisible pour le quadrillage et les tableaux. Fond blanc (« fond »), texte principal presque noir (« encre »).
+# Les trois palettes viennent de strategie/palettes-graphiques-2026-11-27.md (contrastes vérifiés).
+PALETTES = {
+    "bleu": {"nom": "bleu", "avant": "#1D5FB4", "secondaire": "#8DBDEB", "marginale": "#CBD5DF",
+             "texte_doux": "#4D5B69", "filet": "#E2E7EC", "encre": "#171C22", "fond": "#FFFFFF"},
+    "sarcelle": {"nom": "sarcelle", "avant": "#0B7A80", "secondaire": "#8FD3D3", "marginale": "#D2DCDC",
+                 "texte_doux": "#4A5A5B", "filet": "#E2E9E9", "encre": "#161D1E", "fond": "#FFFFFF"},
+    "terracotta": {"nom": "terracotta", "avant": "#B9461A", "secondaire": "#F2B38E", "marginale": "#D9D1C8",
+                   "texte_doux": "#5A524B", "filet": "#ECE6DF", "encre": "#1E1A17", "fond": "#FFFFFF"},
+}
+PALETTE = PALETTES["sarcelle"]
+
+
+def palette_de(palette=None):
+    """La palette à utiliser : PALETTE par défaut, un nom de PALETTES (sans tenir compte de la casse), ou un dict,
+    complété par la palette de PALETTES qui porte son « nom », sinon par PALETTE."""
+    if palette is None:
+        return dict(PALETTE)
+    if isinstance(palette, str):
+        nom = palette.strip().lower()
+        if nom not in PALETTES:
+            raise ValueError(f"Palette inconnue : « {palette} ». Palettes possibles : {', '.join(PALETTES)}.")
+        return dict(PALETTES[nom])
+    base = PALETTES.get(str(palette.get("nom", "")).lower(), PALETTE)  # un dict nommé est complété par sa palette
+    return {**base, **palette}
+
+
+def variables_css(palette=None):
+    """Les couleurs de la palette en variables CSS (--avant, --secondaire...), placées avant style.css."""
+    pal = palette_de(palette)
+    lignes = "".join(f"  --{cle.replace('_', '-')}: {valeur};\n" for cle, valeur in pal.items() if cle != "nom")
+    return ":root {\n" + lignes + "}"
 
 
 LETTRES = ["zéro", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix", "onze", "douze",
@@ -144,94 +175,155 @@ def verifier_le_texte(v):
 
 
 # ---------------------------------------------------------------- graphiques (SVG, unités en mm)
+# Police des graphiques : celle de la feuille de style (règle « svg »), sans empattement et à chiffres alignés.
 
-def t(x, y, texte, taille=3.0, couleur=ENCRE, ancre="start", italique=False, gras=False):
-    style = (' font-style="italic"' if italique else "") + (' font-weight="bold"' if gras else "")
+def t(x, y, texte, taille, couleur, ancre="start", poids=None):
+    style = f' font-weight="{poids}"' if poids else ""
     return (f'<text x="{x:.2f}" y="{y:.2f}" font-size="{taille}" fill="{couleur}" text-anchor="{ancre}"{style}>'
             f"{e(texte)}</text>")
 
 
 def r(x, y, l, h, couleur):
-    return f'<rect x="{x:.2f}" y="{y:.2f}" width="{max(l, 0):.2f}" height="{h:.2f}" fill="{couleur}"/>'
+    return f'<rect x="{x:.2f}" y="{y:.2f}" width="{max(l, 0):.2f}" height="{max(h, 0):.2f}" fill="{couleur}"/>'
+
+
+def trait(x1, y1, x2, y2, couleur, epaisseur):
+    return f'<line x1="{x1:.2f}" y1="{y1:.2f}" x2="{x2:.2f}" y2="{y2:.2f}" stroke="{couleur}" stroke-width="{epaisseur}"/>'
+
+
+def largeur(texte, taille):
+    """Largeur approchée d'un texte (mm), pour éviter les chevauchements d'étiquettes."""
+    return 0.5 * taille * len(str(texte))
 
 
 def svg(l, h, contenu):
-    return f'<svg width="{l}mm" height="{h}mm" viewBox="0 0 {l} {h}" xmlns="http://www.w3.org/2000/svg">{contenu}</svg>'
+    return f'<svg width="{l}mm" height="{h:.2f}mm" viewBox="0 0 {l} {h:.2f}" xmlns="http://www.w3.org/2000/svg">{contenu}</svg>'
 
 
-def barres_100(lignes, couleurs, etiquettes_haut, L=158, extra=0.0):
-    """Barres empilées à 100 %, l'une sous l'autre. lignes = [(libellé, sous-libellé, [parts])].
-    extra (mm) : hauteur en plus, répartie entre l'épaisseur des barres et l'espace entre elles (remplissage de page)."""
+def barres_100(lignes, categories, palette=None, L=170, extra=0.0):
+    """Barres empilées à 100 %, l'une sous l'autre. lignes = [(libellé, total, [parts])], dans l'ordre des
+    catégories : la première est mise en avant (couleur franche), la deuxième en clair, la troisième en gris.
+    Les catégories sont nommées une seule fois, au-dessus de la première barre ; la part mise en avant est écrite
+    en gras au début de chaque barre, alignée d'une barre à l'autre. Un segment de moins d'un demi-millimètre (une
+    part de quelques dixièmes de pour cent) n'est pas dessiné à part : il ne ferait qu'un liseré, pris pour un défaut.
+    extra (mm) : hauteur en plus, surtout pour l'espace entre les barres (remplissage de page)."""
+    pal = palette_de(palette)
+    couleurs = [pal["avant"], pal["secondaire"], pal["marginale"]]
     n = len(lignes)
-    x0, larg, y0 = 44, L - 44, 6
-    h = 6.6 + min(extra / n * 0.75, 5.0)
-    pas = h + 4.9 + (extra - n * (h - 6.6)) / n
-    taille_pc = 3.0 + min((h - 6.6) * 0.12, 0.9)  # pourcentages un peu plus grands dans des barres épaisses
+    x0, y0 = 38, 6.5
+    larg = L - x0
+    h = 7.0 + min(extra / n * 0.3, 1.0)
+    pas = h + 5.0 + max(extra - n * (h - 7.0), 0) / max(n - 1, 1)
+    taille_pc = 3.4 + min((h - 7.0) * 0.2, 0.2)
     c = []
-    # Étiquettes directes au-dessus de la première barre, au milieu de leur segment.
-    debut = 0
-    for part, (texte, couleur) in zip(lignes[0][2], etiquettes_haut):
-        if texte:
-            c.append(t(x0 + larg * (debut + part / 2), y0 - 1.6, texte, 3.1, couleur, "middle", italique=True))
+    # Noms des catégories, au-dessus de la première barre, au début de leur segment (le dernier calé à droite).
+    fin_precedente, debut = -1e9, 0.0
+    for k, (nom, part) in enumerate(zip(categories, lignes[0][2])):
+        if nom and part > 0:
+            dernier = k == len(categories) - 1 and k > 0
+            x = x0 + larg * (debut + part) if dernier else x0 + larg * debut
+            gauche = x - largeur(nom, 3.0) if dernier else x
+            if gauche > fin_precedente + 2:
+                c.append(t(x, y0 - 2.0, nom, 3.0, pal["avant"] if k == 0 else pal["texte_doux"],
+                           "end" if dernier else "start", 600 if k == 0 else None))
+                fin_precedente = gauche + largeur(nom, 3.0)
         debut += part
-    for i, (libelle, sous, parts) in enumerate(lignes):
+    for i, (libelle, total, parts) in enumerate(lignes):
         y = y0 + i * pas
-        c.append(t(0, y + h / 2 - 0.3, libelle, 3.1))
-        c.append(t(0, y + h / 2 + 3.0, sous, 2.8, ENCRE_DOUCE, italique=True))
-        x = x0
-        for part, couleur in zip(parts, couleurs):
-            l = larg * part
-            c.append(r(x, y, l, h, couleur))
-            if l >= 9:
-                clair = couleur in (BLEU, OCRE, GRIS)
-                c.append(t(x + l / 2, y + h / 2 + taille_pc * 0.35, pc(part), taille_pc, "#ffffff" if clair else ENCRE, "middle"))
+        c.append(t(0, y + h / 2 - 0.3, libelle, 3.2, pal["encre"]))
+        c.append(t(0, y + h / 2 + 3.3, total, 2.7, pal["texte_doux"]))
+        # Largeurs dessinées : un segment trop fin pour se voir est rendu au segment précédent (le total reste 100 %).
+        dessin = [larg * part for part in parts]
+        for k in range(1, len(dessin)):
+            if 0 < dessin[k] < 0.5:
+                dessin[k - 1], dessin[k] = dessin[k - 1] + dessin[k], 0.0
+        x, segments = x0, []
+        for k, (part, l, couleur) in enumerate(zip(parts, dessin, couleurs)):
+            if l > 0:
+                c.append(r(x, y, l, h, couleur))
+            texte = pc(part)
+            if k == 0:  # la part mise en avant : toujours écrite, dans la barre si elle y tient, sinon juste après, en encre
+                dedans = l >= largeur(texte, taille_pc) + 3.6
+                c.append(t(x + 1.8 if dedans else x + l + 1.5, y + h / 2 + taille_pc * 0.36, texte, taille_pc,
+                           pal["fond"] if dedans else pal["encre"], "start", 600))
+            elif k == 1 and l >= largeur(texte, 3.1) + 3.6 and (x - x0) >= largeur(pc(parts[0]), taille_pc) + 3.6:
+                c.append(t(x + 1.8, y + h / 2 + 3.1 * 0.36, texte, 3.1, pal["encre"]))
             x += l
-    return svg(L, y0 + (n - 1) * pas + h + 1.5, "".join(c))
+            if l > 0:
+                segments.append((x, l))
+        for (xb, l), (_, l_suivant) in zip(segments, segments[1:]):  # filet blanc entre deux segments visibles
+            if min(l, l_suivant) >= 0.8:
+                c.append(trait(xb, y, xb, y + h, pal["fond"], 0.35))
+    return svg(L, y0 + (n - 1) * pas + h + 1.0, "".join(c))
 
 
-def colonnes_par_annee(v, L=158, H=66):
-    """Coût des grands projets selon l'année de déclaration de viabilité, empilé : vague à venir en bas (bleu)."""
+def annee_pic(v):
+    """L'année où le coût des projets pas encore en travaux est le plus haut (titre et annotation du graphique 2)."""
+    return int(v["par_an"]["pre"].idxmax())
+
+
+def colonnes_par_annee(v, palette=None, L=170, H=66):
+    """Coût des grands projets selon l'année de déclaration de viabilité, en colonnes empilées : la vague à venir
+    en bas (couleur franche), les chantiers et projets en clôture au-dessus (en clair). Étiquettes directes :
+    les chantiers au-dessus de leur plus haute colonne ancienne, la vague à droite de la dernière colonne.
+    L'année du pic de la vague (annee_pic) est annotée, calée à droite sur sa colonne."""
+    pal = palette_de(palette)
     d = v["par_an"]
-    x0, x1, base, haut = 9, L - 2, H - 9, 9
-    ymax = 25 * (int(d.sum(axis=1).max() // 25) + 1)
-    k = (base - haut) / ymax
+    total = d.sum(axis=1)
+    annees = list(d.index)
+    marge_droite = 22
+    x0, x1, haut, base = 0, L - marge_droite, 8, H - 9
+    k = (base - haut) / total.max()
     pas = (x1 - x0) / len(d)
     larg = pas * 0.72
+
+    def centre(i):
+        return x0 + i * pas + pas / 2
+
     c = []
-    for val in range(25, ymax + 1, 25):
+    # Quadrillage : deux ou trois lignes presque invisibles, valeur posée au-dessus de la ligne, unité sur la dernière.
+    pas_grille = next(s for s in (10, 20, 25, 50, 100, 200, 500) if total.max() / s <= 3)
+    valeurs = list(range(pas_grille, int(total.max()) + 1, pas_grille))
+    for val in valeurs:
         y = base - val * k
-        c.append(f'<line x1="{x0}" y1="{y:.2f}" x2="{x1}" y2="{y:.2f}" stroke="#e4dfd3" stroke-width="0.2"/>')
-        c.append(t(x0 - 1.5, y + 1.0, fr(val, 0), 2.8, ENCRE_DOUCE, "end"))
-    c.append(f'<line x1="{x0}" y1="{base}" x2="{x1}" y2="{base}" stroke="{GRIS}" stroke-width="0.25"/>')
+        c.append(trait(x0, y, x1, y, pal["filet"], 0.25))
+        c.append(t(x0, y - 1.2, fr(val, 0) + (" Md S/" if val == valeurs[-1] else ""), 2.7, pal["texte_doux"]))
     for i, (annee, ligne) in enumerate(d.iterrows()):
-        x = x0 + i * pas + (pas - larg) / 2
+        x = centre(i) - larg / 2
         h_pre, h_autres = ligne.get("pre", 0) * k, ligne.get("autres", 0) * k
-        c.append(r(x, base - h_pre, larg, h_pre, BLEU))
-        c.append(r(x, base - h_pre - h_autres, larg, h_autres, GRIS))
-        if annee % 4 == v["annee"] % 4 or annee == d.index.min():
-            c.append(t(x + larg / 2, base + 4.4, str(annee), 2.9, ENCRE_DOUCE, "middle"))
-    # Annotation de l'année la plus haute, et étiquettes directes des deux couleurs.
-    pic = d.sum(axis=1).idxmax()
-    i_pic = list(d.index).index(pic)
-    x_pic = x0 + i_pic * pas + pas / 2
-    y_pic = base - d.loc[pic].sum() * k
-    c.append(t(x_pic - 3, y_pic - 2.2, f"{pic} : {fr(v['n_par_an'].get(pic, 0), 0)} projets, {md(d.loc[pic].sum() * 1e9)} Md S/",
-               2.7, ENCRE, "end", italique=True))
-    # « pas encore en travaux » : posé au-dessus des barres qui précèdent le début de la vague, avec un trait en coude
-    # qui descend droit dans la partie bleue de l'année d'avant (sans traverser d'autre barre).
-    i_cible = list(d.index).index(v["debut_vague"].year - 1) if v["debut_vague"].year - 1 in d.index else len(d) - 3
-    x_cible = x0 + i_cible * pas + pas / 2
-    y_cible = base - d.iloc[i_cible].get("pre", 0) * k * 0.5
-    y_bleu = base - (d.iloc[max(i_cible - 6, 0):i_cible + 1].sum(axis=1).max() + 9) * k
-    c.append(t(x_cible - 2.0, y_bleu, "pas encore en travaux", 2.9, BLEU, "end", italique=True, gras=True))
-    c.append(f'<path d="M{x_cible - 1.4:.2f},{y_bleu - 0.9:.2f}L{x_cible:.2f},{y_bleu - 0.9:.2f}L{x_cible:.2f},{y_cible:.2f}" '
-             f'fill="none" stroke="{BLEU}" stroke-width="0.25"/>')
-    i_gris = list(d.index).index(2013) if 2013 in d.index else len(d) // 2
-    y_gris = base - d.iloc[i_gris].sum() * k
-    c.append(t(x0 + i_gris * pas + pas / 2, y_gris - 2.2, "en travaux ou en clôture", 2.7, ENCRE_DOUCE, "middle", italique=True))
-    c.append(t(x0 + (len(d) - 1) * pas + pas / 2, base + 7.6, f"(au {v['annee_dernier']:%d/%m})", 2.5,
-               ENCRE_DOUCE, "middle", italique=True))
-    c.append(t(x0 - 1.5, haut - 3.5, "Md S/", 2.8, ENCRE_DOUCE, "end", italique=True))
+        c.append(r(x, base - h_pre, larg, h_pre, pal["avant"]))
+        c.append(r(x, base - h_pre - h_autres, larg, h_autres, pal["secondaire"]))
+        if min(h_pre, h_autres) >= 0.6:  # filet blanc entre les deux parties, si les deux se voient
+            c.append(trait(x, base - h_pre, x + larg, base - h_pre, pal["fond"], 0.35))
+        if annee % 4 == v["annee"] % 4:
+            c.append(t(centre(i), base + 4.2, str(annee), 2.7, pal["texte_doux"], "middle"))
+    c.append(trait(x0, base, x1, base, pal["texte_doux"], 0.25))
+    c.append(t(centre(len(d) - 1), base + 7.6, f"au {v['annee_dernier']:%d/%m}", 2.5, pal["texte_doux"], "middle"))
+
+    def au_dessus(gauche, droite, ecart=1.5):
+        """Hauteur (mm) d'une étiquette posée entre les abscisses gauche et droite, au-dessus des colonnes qu'elle couvre."""
+        voisines = [j for j in range(len(d)) if centre(j) + larg / 2 >= gauche and centre(j) - larg / 2 <= droite]
+        return base - max(total.iloc[voisines]) * k - ecart
+
+    # L'année du pic de la vague, annotée sobrement au-dessus de sa colonne, calée sur son bord droit.
+    pic = annee_pic(v)
+    i_pic = annees.index(pic)
+    note_pic = f"{pic} : {fr(v['n_par_an'].get(pic, 0), 0)} projets, {md(total[pic] * 1e9)} Md S/"
+    x_pic = centre(i_pic) + larg / 2
+    c.append(t(x_pic, au_dessus(x_pic - largeur(note_pic, 2.7), x_pic), note_pic, 2.7, pal["encre"], "end"))
+    # Chantiers et clôtures : au-dessus de la plus haute colonne où la vague à venir pèse peu.
+    anciennes = [i for i, a in enumerate(annees) if total[a] > 0 and d.loc[a].get("pre", 0) < 0.15 * total[a]]
+    if anciennes:
+        i_c = max(anciennes, key=lambda i: total.iloc[i])
+        texte = "En travaux ou en clôture"
+        demi = largeur(texte, 2.8) / 2
+        c.append(t(centre(i_c), au_dessus(centre(i_c) - demi, centre(i_c) + demi), texte, 2.8, pal["texte_doux"], "middle"))
+    # Vague à venir : à droite de la dernière colonne, à mi-hauteur de sa partie foncée.
+    h_pre_fin = d.iloc[-1].get("pre", 0) * k
+    y_v = base - max(h_pre_fin / 2, 4.5)
+    x_v = centre(len(d) - 1) + larg / 2 + 1.8
+    c.append(t(x_v, y_v - 0.6, "Pas encore", 2.8, pal["avant"], "start", 600))
+    c.append(t(x_v, y_v + 2.9, "en travaux", 2.8, pal["avant"], "start", 600))
     return svg(L, H, "".join(c))
 
 
@@ -248,9 +340,9 @@ def tableau_gros(v, noms_courts):
     return "\n".join(lignes)
 
 
-def remplir(v, extras=None):
+def remplir(v, extras=None, palette=None):
     """Toutes les valeurs du modèle. extras : hauteur en plus pour les graphiques et interligne du tableau (mm),
-    calculés par mettre_en_page pour que chaque page soit pleine."""
+    calculés par mettre_en_page pour que chaque page soit pleine. palette : voir palette_de."""
     extras = extras or {"g1": 0.0, "g2": 0.0, "ligne": 1.2}
     g, pre, p, tot = v["g"], v["pre"], v["parts"], v["totaux"]
     annee, jour = v["annee"], v["jour"]
@@ -285,13 +377,13 @@ def remplir(v, extras=None):
         "annee_dernier_long": f"{v['annee_dernier'].day} {fiche.MOIS_FR[v['annee_dernier'].month - 1]}",
         "md_usd": fr(1e3 / v["taux"], 0), "marche_median_usd": fr(v["marche_pre_median"] / 1e6 / v["taux"], 0),
         "ppp_facteur": ("trois fois plus" if v["modes_pre"]["ppp"] / v["modes_travaux"]["ppp"] >= 2.6 else "plus de deux fois plus"),
+        "pic": annee_pic(v),
         "graphique_1": barres_100(
-            [("Coût prévu", f"{md(tot['cout'])} Md S/, sur toute la durée", p["cout"]),
+            [("Coût prévu", f"{md(tot['cout'])} Md S/", p["cout"]),
              (f"Budget {annee}", f"{md(tot['budget'])} Md S/", p["budget"]),
-             (f"Programme {annee + 1}-{annee + 3}", f"{md(tot['programme'])} Md S/ inscrits", p["programme"])],
-            [BLEU, GRIS, GRIS_CLAIR], [("pas encore en travaux", BLEU), ("en travaux", ENCRE_DOUCE), ("", None)],
-            extra=extras["g1"]),
-        "graphique_2": colonnes_par_annee(v, H=66 + extras["g2"]),
+             (f"Programme {annee + 1}-{annee + 3}", f"{md(tot['programme'])} Md S/", p["programme"])],
+            ["Pas encore en travaux", "En travaux", "En clôture"], palette, extra=extras["g1"]),
+        "graphique_2": colonnes_par_annee(v, palette, H=66 + extras["g2"]),
         "tableau": tableau_gros(v, noms_courts),
         "ligne": f"{extras['ligne']:.2f}mm",
     }
@@ -304,20 +396,24 @@ HAUTEUR_PAGE = 262  # mm, hauteur de section.page dans style.css
 RESPIRATION = 9     # mm laissés à chaque « respiration » avant de grandir les graphiques
 
 
-def composer(v, extras):
-    valeurs = remplir(v, extras)
+def composer(v, extras, palette=None):
+    valeurs = remplir(v, extras, palette)
+    valeurs["couleurs"] = variables_css(palette)
     valeurs["style"] = (DOSSIER / "style.css").read_text(encoding="utf-8")
     return fiche.typographie(Template((DOSSIER / "modele.html").read_text(encoding="utf-8")).substitute(valeurs))
 
 
-def mesurer(page):
+def mesurer(page, dossier=None):
     """Hauteur naturelle (mm) du contenu de chaque page, sans les respirations, telle que Chrome la compose.
-    On libère la hauteur des pages, on écrase les respirations, et un petit script écrit les mesures dans le DOM."""
+    On libère la hauteur des pages, on écrase les respirations, et un petit script écrit les mesures dans le DOM.
+    Le fichier d'essai est écrit (puis effacé) dans dossier, exports/ par défaut."""
     sonde = """<style>.page{height:auto!important}.respire{flex:none!important;height:0!important;min-height:0!important}
     .pied{margin-top:0!important}body{width:170mm}</style><script>
     addEventListener('load',()=>{document.body.dataset.mesures=JSON.stringify([...document.querySelectorAll('section.page')]
       .map(s=>({h:s.getBoundingClientRect().height*25.4/96, r:s.querySelectorAll('.respire').length})))});</script>"""
-    essai = ind.SORTIE_DIR / "note_mesure.html"
+    dossier = Path(dossier) if dossier else ind.SORTIE_DIR
+    dossier.mkdir(parents=True, exist_ok=True)
+    essai = dossier / "note_mesure.html"
     essai.write_text(page.replace("</head>", sonde + "</head>"), encoding="utf-8")
     dom = subprocess.run([str(fiche.CHROME), "--headless=new", "--disable-gpu", "--virtual-time-budget=3000", "--dump-dom",
                           essai.as_uri()], capture_output=True, text=True, encoding="utf-8", timeout=90).stdout
@@ -328,21 +424,26 @@ def mesurer(page):
     return json.loads(html.unescape(trouve.group(1)))
 
 
-def mettre_en_page(v):
-    """Compose la note, mesure la place libre sur chaque page, puis la donne aux graphiques (pages 1 et 2) et à
-    l'interligne du tableau (page 3). Les respirations entre les parties prennent le reste, et le pied de la
-    dernière page descend en bas. Arrête le script si une page déborde."""
+G1_EXTRA_MAX = 8   # mm : au-delà, les barres du graphique 1 s'écartent trop les unes des autres
+G2_EXTRA_MAX = 25  # mm : au-delà, la zone de tracé du graphique 2 devient plus haute que la moitié de sa largeur
+
+
+def mettre_en_page(v, palette=None, dossier=None):
+    """Compose la note, mesure la place libre sur chaque page, puis en donne une part plafonnée aux graphiques
+    (pages 1 et 2) et à l'interligne du tableau (page 3). Les respirations entre les parties prennent le reste,
+    dans leur limite : mieux vaut un peu de blanc en bas d'une page qu'un graphique étiré. Le pied de la dernière
+    page descend en bas. Arrête le script si une page déborde. dossier : voir mesurer."""
     extras = {"g1": 0.0, "g2": 0.0, "ligne": 1.2}
-    mesures = mesurer(composer(v, extras))
+    mesures = mesurer(composer(v, extras, palette), dossier)
     libre = [HAUTEUR_PAGE - m["h"] - m["r"] * RESPIRATION for m in mesures]
     if min(HAUTEUR_PAGE - m["h"] for m in mesures) < 0:
         raise SystemExit(f"Une page déborde (hauteurs : {[round(m['h']) for m in mesures]} mm pour {HAUTEUR_PAGE}) : raccourcir.")
-    extras["g1"] = min(max(libre[0] + 8, 0), 28)
-    extras["g2"] = min(max(libre[1], 0), 70)
+    extras["g1"] = min(max(libre[0], 0), G1_EXTRA_MAX)
+    extras["g2"] = min(max(libre[1], 0), G2_EXTRA_MAX)
     lignes = len(v["gros"])
     extras["ligne"] = 1.2 + min(max(libre[2], 0) / (2 * lignes), 1.6)
-    page = composer(v, extras)
-    apres = mesurer(page)
+    page = composer(v, extras, palette)
+    apres = mesurer(page, dossier)
     if max(m["h"] for m in apres) > HAUTEUR_PAGE:
         raise SystemExit(f"Une page déborde après remplissage ({[round(m['h']) for m in apres]} mm) : à corriger.")
     return page, extras, [round(HAUTEUR_PAGE - m["h"], 1) for m in apres]
@@ -357,20 +458,35 @@ def imprimer(page_html, pdf):
     return pages
 
 
+def generer(jour, palette=None, sortie=None):
+    """Produit la note des données MEF du jour donné, avec la palette donnée (nom de PALETTES, dict, ou None pour
+    PALETTE). sortie : un dossier (note_<jour>.html et note_<jour>.pdf dedans, exports/ par défaut) ou le chemin
+    d'un PDF (le HTML est écrit à côté, même nom). Renvoie le chemin du PDF, son nombre de pages et les réglages
+    de mise en page."""
+    v = calculer(jour)
+    verifier_le_texte(v)
+    sortie = Path(sortie) if sortie else ind.SORTIE_DIR
+    if sortie.suffix.lower() == ".pdf":
+        sortie_pdf, sortie_html = sortie, sortie.with_suffix(".html")
+    else:
+        sortie_html, sortie_pdf = sortie / f"note_{jour.isoformat()}.html", sortie / f"note_{jour.isoformat()}.pdf"
+    sortie_pdf.parent.mkdir(parents=True, exist_ok=True)
+    page, extras, reste = mettre_en_page(v, palette, sortie_pdf.parent)
+    fiche.controler(page, {})
+    sortie_html.write_text(page, encoding="utf-8")
+    pages = imprimer(sortie_html, sortie_pdf)
+    return {"pdf": sortie_pdf, "html": sortie_html, "pages": pages, "extras": extras, "reste": reste}
+
+
 def main():
     sys.stdout.reconfigure(encoding="utf-8")
     jour = max(ch.lister_archives())
-    v = calculer(jour)
-    verifier_le_texte(v)
     ind.SORTIE_DIR.mkdir(exist_ok=True)
-    page, extras, reste = mettre_en_page(v)
+    res = generer(jour)
+    extras = res["extras"]
     print(f"Mise en page : graphique 1 +{extras['g1']:.0f} mm, graphique 2 +{extras['g2']:.0f} mm, "
-          f"interligne du tableau {extras['ligne']:.1f} mm ; place pour les respirations : {reste} mm")
-    fiche.controler(page, {})
-    sortie_html, sortie_pdf = ind.SORTIE_DIR / f"note_{jour.isoformat()}.html", ind.SORTIE_DIR / f"note_{jour.isoformat()}.pdf"
-    sortie_html.write_text(page, encoding="utf-8")
-    pages = imprimer(sortie_html, sortie_pdf)
-    print(f"Note des données MEF du {jour:%d/%m/%Y} ({pages} pages) -> {sortie_pdf}")
+          f"interligne du tableau {extras['ligne']:.1f} mm ; place pour les respirations : {res['reste']} mm")
+    print(f"Note des données MEF du {jour:%d/%m/%Y} ({res['pages']} pages, palette {palette_de()['nom']}) -> {res['pdf']}")
 
 
 if __name__ == "__main__":

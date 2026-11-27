@@ -4,12 +4,13 @@
 <meta charset="utf-8">
 <title>Deux générations de grands projets, Pérou, $mois</title>
 <style>
+$couleurs
 $style
 </style>
 </head>
 <body>
 
-<!-- Trois pages composées une à une. Chaque page est pleine : la place libre va aux graphiques (calculée par note.py),
+<!-- Trois pages composées une à une. La place libre va d'abord, dans une limite, aux graphiques (calculée par note.py),
      le reste aux respirations entre les parties. Un texte et son graphique sont toujours sur la même page. -->
 
 <section class="page">
@@ -20,21 +21,21 @@ $style
   <div class="bandeau">
     <div><span class="grand">$nb</span><span class="legende">grands projets publics actifs</span></div>
     <div><span class="grand">$cout</span><span class="legende">milliards de soles de coût prévu, environ $cout_usd milliards de dollars</span></div>
-    <div><span class="grand bleu">$pre_cout</span><span class="legende">de ce coût n'est pas encore en travaux</span></div>
+    <div><span class="grand avant">$pre_cout</span><span class="legende">de ce coût n'est pas encore en travaux</span></div>
   </div>
 
   <div class="respire"></div>
   <h2>Le budget de l'année va aux chantiers</h2>
-  <p class="lettrine">Chaque jour, le ministère de l'Économie et des Finances (MEF) publie la liste de tous les investissements publics actifs au Pérou, soit environ $nb_complet lignes. Les $nb projets d'au moins 100 millions de soles n'en sont qu'une petite fraction, mais ils concentrent $part_complet du coût total.</p>
+  <p>Chaque jour, le ministère de l'Économie et des Finances (MEF) publie la liste de tous les investissements publics actifs au Pérou, soit environ $nb_complet lignes. Les $nb projets d'au moins 100 millions de soles n'en sont qu'une petite fraction, mais ils concentrent $part_complet du coût total.</p>
   <p>Ce montant couvre toute la vie des projets. Pour l'année, ils disposent d'un budget $annee de $budget milliards de soles, réparti tout autrement. Ceux qui ne sont pas encore en travaux représentent plus de la moitié du coût, mais reçoivent moins d'un dixième de ce budget. Le programme multiannuel $an1-$an3 leur réserve $pre_programme des montants inscrits.</p>
 
   <div class="respire"></div>
   <figure>
-    <div class="panneau">
-      <p class="titre-graphique">Trois façons de mesurer les mêmes $nb projets</p>
+    <div>
+      <p class="titre-graphique">Les projets pas encore en travaux pèsent $pre_cout du coût, mais reçoivent $pre_budget du budget $annee</p>
       $graphique_1
     </div>
-    <figcaption>En bleu, les projets pas encore en travaux ; en gris, les chantiers ouverts ; en gris clair, les projets en clôture.</figcaption>
+    <figcaption>Les mêmes $nb projets, mesurés trois fois : par leur coût prévu sur toute leur durée, par leur budget de l'année&nbsp;$annee et par les montants inscrits au programme multiannuel $an1-$an3.</figcaption>
   </figure>
   <p class="folio">1/3</p>
 </section>
@@ -45,13 +46,13 @@ $style
 
   <div class="respire"></div>
   <figure>
-    <div class="panneau">
-      <p class="titre-graphique">Coût des grands projets selon l'année où ils ont été déclarés viables</p>
+    <div>
+      <p class="titre-graphique">Les projets pas encore en travaux ont été déclarés viables récemment, avec un pic en $pic</p>
       $graphique_2
     </div>
-    <figcaption>Le gris des chantiers vient surtout des années 2012 à 2020, le bleu de la vague suivante des années récentes. Les projets déjà clôturés ne sont plus dans le fichier.</figcaption>
+    <figcaption>Coût des grands projets selon l'année où ils ont été déclarés viables. Les chantiers en cours viennent surtout des années 2012 à 2020 ; les projets déjà clôturés ne sont plus dans le fichier.</figcaption>
   </figure>
-  <p>Les déclarations se poursuivent : du 1er janvier au $annee_dernier_long, $annee_n grands projets ont été déclarés viables, pour $annee_cout milliards de soles.</p>
+  <p>Les déclarations se poursuivent : du 1<sup>er</sup> janvier au $annee_dernier_long, $annee_n grands projets ont été déclarés viables, pour $annee_cout milliards de soles.</p>
 
   <div class="respire"></div>
   <h2>Marché public ou partenariat public-privé</h2>

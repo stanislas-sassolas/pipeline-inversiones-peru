@@ -44,7 +44,7 @@ def capture(page, png, largeur, hauteur):
 def capture_note(note_html, png):
     """Aperçu de la page 1 de la note, avec ses marges, comme une feuille A4 (794 x 1123 px)."""
     page = note_html.read_text(encoding="utf-8").replace(
-        "</head>", "<style>body{padding:16mm 20mm 0;background:#fff}</style></head>")
+        "</head>", "<style>body{padding:16mm 20mm 0;background:#fff}.page~.page{display:none}</style></head>")
     temporaire = note_html.with_name("note_apercu.html")
     temporaire.write_text(page, encoding="utf-8")
     capture(temporaire, png, 794, 1123)
