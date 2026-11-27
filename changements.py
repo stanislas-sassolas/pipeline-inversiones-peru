@@ -176,12 +176,14 @@ def comparer(avant, apres):
     def ajouter(codes, signal, valeur_avant=None, valeur_apres=None, ecart_M=None, ecart_points=None,
                 remarque=None):
         """Ajoute une ligne par code. Les valeurs sont des colonnes (Series) indexées par code, ou None."""
-        def prendre(serie):
-            return None if serie is None else serie.reindex(codes).values
+        def prendre(serie, vide=None):
+            return vide if serie is None else serie.reindex(codes).values
+        # Colonnes de nombres : une case sans valeur est un NaN (nombre), pas un None (texte), pour que toutes les
+        # lignes gardent le même type de colonne une fois rassemblées.
         morceaux.append(pd.DataFrame({
             "CODIGO_UNICO": codes, "signal": signal,
             "avant": prendre(valeur_avant), "apres": prendre(valeur_apres),
-            "ecart_M_soles": prendre(ecart_M), "ecart_points": prendre(ecart_points),
+            "ecart_M_soles": prendre(ecart_M, float("nan")), "ecart_points": prendre(ecart_points, float("nan")),
             "remarque": prendre(remarque),
         }))
 
@@ -238,7 +240,9 @@ def comparer(avant, apres):
     modes_a, modes_b = A["MODES"].map(frozenset), B["MODES"].map(frozenset)
     ajouter(suivis[modes_a != modes_b], MODES, A["MODES"].map(" + ".join), B["MODES"].map(" + ".join))
 
-    signaux = pd.concat(morceaux, ignore_index=True)
+    # Les morceaux vides (aucun projet pour ce signal) sont écartés : ils ne changent rien au résultat et pandas
+    # avertit qu'il les traitera autrement dans une prochaine version.
+    signaux = pd.concat([m for m in morceaux if len(m)] or morceaux, ignore_index=True)
     # Nom, secteur et coût du projet, pris dans l'archive récente (dans l'ancienne pour les sortis).
     infos = pd.concat([gB, gA.loc[sortis]])[["CODIGO_UNICO", "NOMBRE_INVERSION", "SECTEUR_FICHE", "COSTO_ACTUALIZADO"]]
     signaux = signaux.merge(infos.reset_index(drop=True), on="CODIGO_UNICO", how="left")

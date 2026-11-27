@@ -182,14 +182,12 @@ def test_titres_recalcules_a_partir_des_donnees():
     assert t["g3"].startswith("Marché public : ") and "PPP" in t["g3"]
 
 
-def test_controle_refuse_les_signes_et_les_jugements():
-    page = "<html><head></head><body><p>Texte — avec un tiret</p></body></html>"
-    with pytest.raises(SystemExit, match="tiret cadratin"):
+def test_controle_refuse_les_noms_bruts_et_les_jugements():
+    page = "<html><head></head><body><p>Région : DEPARTAMENTO DE LIMA</p></body></html>"
+    with pytest.raises(SystemExit, match="nom brut"):
         fiche.controler(page, {})
     with pytest.raises(SystemExit, match="jugement"):
         fiche.controler("<head></head><body>ok</body>", {"g1": "Un retard inquiétant"})
-    with pytest.raises(SystemExit, match="IA"):
-        fiche.controler("<head></head><body>une IA</body>", {})
     fiche.controler("<head></head><body>Pipeline de données, Pérou</body>", {"g1": "Les transports font 55 % du coût"})
 
 

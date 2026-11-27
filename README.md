@@ -1,12 +1,14 @@
 # Pipeline des grands projets d'investissement public au Pérou
 
+[Versión en español](README.es.md)
+
 Projet personnel de Stanislas Sassolas (élève-ingénieur, CPE Lyon), sans lien avec aucune administration.
 
 [![Carte des grands projets d'investissement public au Pérou](docs/images/carte.png)](https://stanislas-sassolas.github.io/pipeline-inversiones-peru/carte.html)
 
-[Voir la page du projet, avec la carte interactive](https://stanislas-sassolas.github.io/pipeline-inversiones-peru/)
+[Voir la page du projet, avec la carte interactive](https://stanislas-sassolas.github.io/pipeline-inversiones-peru/) ([en espagnol](https://stanislas-sassolas.github.io/pipeline-inversiones-peru/es.html))
 
-Le ministère de l'Économie et des Finances du Pérou (MEF) publie chaque jour, en données ouvertes, la liste de tous ses investissements publics actifs : le Banco de Inversiones (environ 150 000 investissements, un CSV de 250 Mo). Ce pipeline de données en Python archive les versions successives du fichier, calcule des indicateurs sur les grands projets (100 millions de soles ou plus), repère ce qui change d'une semaine à l'autre, suit les consultations de ProInversión, et produit une fiche de deux pages et une carte interactive. Au 25/11/2026 : 1 389 grands projets, 726 milliards de soles de coût indicatif. Python, pandas, folium, 129 tests automatiques.
+Le ministère de l'Économie et des Finances du Pérou (MEF) publie chaque jour, en données ouvertes, la liste de tous ses investissements publics actifs : le Banco de Inversiones (environ 150 000 investissements, un CSV de 250 Mo). Ce pipeline de données en Python archive les versions successives du fichier, calcule des indicateurs sur les grands projets (100 millions de soles ou plus), repère ce qui change d'une semaine à l'autre, suit les consultations de ProInversión, et produit une note de trois pages et une carte interactive. Au 25/11/2026 : 1 389 grands projets, 726,5 milliards de soles de coût indicatif. Python, pandas, folium, 153 tests automatiques.
 
 ## En bref
 
@@ -19,7 +21,7 @@ Le ministère de l'Économie et des Finances du Pérou (MEF) publie chaque jour,
 | Note de trois pages (lecture rapide) | `exports/note_<date>.pdf` | `note.py` |
 | Fiche de deux pages (tous les indicateurs) | `exports/fiche_<date>.pdf` | `fiche.py` |
 | Carte interactive | `exports/carte_<date>.html` | `carte.py` |
-| Page de démonstration | `docs/` (GitHub Pages) | `pipeline.py --publier` |
+| Page de démonstration, en français et en espagnol | `docs/index.html`, `docs/es.html` (GitHub Pages) | `pipeline.py --publier` |
 
 Les fichiers « de travail » détaillent projet par projet. La fiche et la carte ne citent aucune entreprise en dehors des intitulés officiels du MEF, et ne classent aucune région.
 
@@ -41,7 +43,7 @@ Le pipeline a besoin d'au moins deux archives de jours différents : le premier 
 
 Les tests tournent aussi automatiquement sur GitHub à chaque envoi (`.github/workflows/tests.yml`).
 
-Fichiers faits à la main, avec leur source quand c'est une correction : `secteurs.csv` (regroupement des fonctions en secteurs), `corrections_projets.csv` (corrections et notes par projet), `correspondance_proinversion.csv` (lien entre consultations et projets du MEF), `fiche/lecture.txt` (texte « À retenir » de la note, 900 caractères au plus, à créer : tant qu'il manque, la note reste un brouillon et n'est pas publiée), `fiche/noms_courts.csv` et `fiche/noms_consultations.csv` (noms courts). Le dictionnaire des colonnes du fichier du MEF est dans `dictionnaire_colonnes.md`.
+Fichiers faits à la main, avec leur source quand c'est une correction : `secteurs.csv` (regroupement des fonctions en secteurs), `corrections_projets.csv` (corrections et notes par projet), `correspondance_proinversion.csv` (lien entre consultations et projets du MEF), `fiche/lecture.txt` (texte « À retenir » de la fiche, 900 caractères au plus, à créer : tant qu'il manque, la fiche reste un brouillon et n'est pas publiée), `fiche/noms_courts.csv` et `fiche/noms_consultations.csv` (noms courts). Le dictionnaire des colonnes du fichier du MEF est dans `dictionnaire_colonnes.md`.
 
 ## Sources
 

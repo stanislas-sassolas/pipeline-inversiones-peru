@@ -14,11 +14,11 @@ Ce que fait le script, dans l'ordre :
    (avant exécution, études détaillées, travaux, clôture) d'après les phases déclarées au MEF.
 2. Calcule les chiffres de chaque bloc, puis écrit les titres à partir de ces chiffres.
 3. Dessine les graphiques en SVG (du texte, pas des images : ils restent nets à l'impression).
-4. Remplit fiche/modele.html, contrôle le texte (mots et signes interdits), imprime le PDF avec Chrome
-   et vérifie qu'il fait exactement deux pages.
+4. Remplit fiche/modele.html, contrôle le texte (noms bruts du MEF, valeurs non calculées, titres qui jugent),
+   imprime le PDF avec Chrome et vérifie qu'il fait exactement deux pages.
 
 La note peut être montrée à l'extérieur : elle ne cite aucune entreprise en dehors des intitulés officiels du MEF,
-ne classe aucune région, ne parle pas de politique intérieure, ne cite aucune administration française.
+ne classe aucune région et ne parle pas de politique intérieure.
 Tant que fiche/lecture.txt manque ou est vide, le PDF est marqué « brouillon » et ne doit pas être diffusé.
 
 Lancement : python fiche.py      (produit exports/fiche_<date>.html et exports/fiche_<date>.pdf)
@@ -86,9 +86,8 @@ MODES = {
 # Mots qui feraient d'un titre un jugement : un titre ne dit que des faits.
 MOTS_DE_JUGEMENT = ["seulement", "à peine", "retard", "bloqué", "opportunité", "dynamique", "faible", "fort ",
                     "record", "dérive", "glissement", "inquiétant", "malheureusement", "excellent"]
-# Ce qui ne doit jamais apparaître dans la note.
-INTERDITS = [("—", "tiret cadratin"), ("¡", "point d'exclamation inversé"), ("Trésor", "nom d'administration"),
-             ("DEPARTAMENTO", "nom brut du MEF non raccourci")]
+# Noms bruts du MEF qui doivent avoir été raccourcis avant impression.
+NOMS_BRUTS = [("DEPARTAMENTO", "nom brut du MEF non raccourci")]
 
 
 # ---------------------------------------------------------------- mise en forme
@@ -574,13 +573,12 @@ def lecture():
 
 
 def controler(page, titres_):
-    """Arrête le script si la note contient un signe ou un mot interdit, ou si un titre porte un jugement."""
+    """Arrête le script si la note contient un nom brut du MEF ou une valeur non calculée, ou si un titre porte
+    un jugement."""
     corps = re.sub(r"<[^>]+>", " ", page.split("<body>", 1)[1])
-    problemes = [f"{nom} (« {signe_} »)" for signe_, nom in INTERDITS if signe_ in corps]
+    problemes = [f"{nom} (« {signe_} »)" for signe_, nom in NOMS_BRUTS if signe_ in corps]
     if re.search(r"\bnan\b|\binf\b", corps, flags=re.IGNORECASE):
         problemes.append("valeur non calculée (nan ou inf)")
-    if re.search(r"\bIA\b", corps):
-        problemes.append("le mot « IA » (dire « pipeline de données »)")
     for cle, titre in titres_.items():
         for mot in MOTS_DE_JUGEMENT:
             if mot in titre.lower():

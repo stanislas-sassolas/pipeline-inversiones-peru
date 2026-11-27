@@ -1,11 +1,11 @@
 """Note épurée sur les grands projets d'investissement public au Pérou (deuxième format, à côté de fiche.py).
 
-Format : un court essai. Une ligne directrice, de la prose, trois graphiques et un petit tableau, chacun commenté.
-La ligne directrice : le portefeuille des grands projets réunit deux générations. Les chantiers en cours, décidés
-il y a près de dix ans, reçoivent presque tout le budget de l'année ; la vague suivante, plus récente, pèse plus de
-la moitié du coût mais n'est encore que sur plans, et elle tient dans peu de dossiers.
+Format : un court essai. Une ligne directrice, de la prose, deux graphiques et un petit tableau, chacun commenté.
+La ligne directrice : le portefeuille des grands projets réunit deux générations. Les chantiers en cours, déclarés
+viables il y a près de neuf ans (en médiane), reçoivent presque tout le budget de l'année ; la vague suivante,
+plus récente, pèse plus de la moitié du coût mais n'est encore que sur plans, et elle tient dans peu de dossiers.
 
-Le texte est écrit à la main dans ce fichier, mais chaque chiffre est recalculé à chaque lancement. Les phrases qui
+Le texte est écrit à la main dans note/modele.html, mais chaque chiffre est recalculé à chaque lancement. Les phrases qui
 comparent (« plus de la moitié », « près de neuf ans »...) sont protégées par des garde-fous : si les données ne
 les confirment plus, le script s'arrête et demande de relire le texte (fonction verifier_le_texte).
 

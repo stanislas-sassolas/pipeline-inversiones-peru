@@ -232,7 +232,7 @@ def sans_budget_ni_depense(g):
     """Vrai pour les projets sans aucun crédit public : ni PIM ni devengado cette année, ni devengado les années
     précédentes. Le financement privé des APP n'est pas dans le fichier : il n'est donc pas compté ici."""
     return ((g["PIM_ANIO_ACTUAL"] <= 0) & (g["DEV_ANIO_ACTUAL"] <= 0)
-            & (g["DEVEN_ACUMUL_ANIO_ANT"].fillna(0) <= 0))
+            & (pd.to_numeric(g["DEVEN_ACUMUL_ANIO_ANT"]).fillna(0) <= 0))
 
 
 def indicateurs_groupe(g, taux, cout_total_general):

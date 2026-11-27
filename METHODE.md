@@ -80,9 +80,9 @@ Limites :
 - **Statuts** : « Concluido » ne distingue pas un concours attribué d'un concours annulé ou désert.
 - **Usage** : le script fait une quinzaine de requêtes, au plus une fois par jour, et ne télécharge ni ne rediffuse les documents. Source à citer : investinperu.pe (ProInversión), avec la date de consultation.
 
-## Étape 5 : note de deux pages
+## Étape 5 : fiche de deux pages
 
-`fiche.py` rassemble les étapes 2 et 4 dans une note PDF de deux pages, `exports/fiche_<date>.pdf`, imprimée par Chrome à partir du modèle `fiche/modele.html`. Lecteur visé : une entreprise qui veut savoir quels grands projets publics existent, à quel stade, dans quels secteurs, par quel montage, et lesquels suivre.
+`fiche.py` rassemble les étapes 2 et 4 dans une fiche PDF de deux pages, `exports/fiche_<date>.pdf`, imprimée par Chrome à partir du modèle `fiche/modele.html`. Lecteur visé : une entreprise qui veut savoir quels grands projets publics existent, à quel stade, dans quels secteurs, par quel montage, et lesquels suivre.
 
 La forme suit des règles observées dans des notes publiées par des cabinets de conseil et des institutions (Banque mondiale, OCDE, FMI, McKinsey, BCG, guides de graphiques de l'ONS et de la Banque mondiale) : chaque titre est un constat chiffré d'une phrase ; graphiques et tableaux numérotés, avec note et source dessous ; une couleur par stade, la même partout ; une seule police, une couleur d'accent et des gris.
 
@@ -104,11 +104,11 @@ Ce qui est fait à la main :
 - **`fiche/noms_courts.csv`** et **`fiche/noms_consultations.csv`** : des noms courts en français pour les projets et les consultations affichés (les intitulés du MEF font souvent plus de 200 caractères). Un projet absent du fichier garde son nom du MEF, coupé avant le lieu.
 
 Règles de présentation :
-- aucune entreprise citée en dehors des intitulés officiels du MEF, aucune région classée (seulement les trois niveaux de gouvernement), pas de politique intérieure, aucune administration française citée ;
+- aucune entreprise citée en dehors des intitulés officiels du MEF, aucune région classée (seulement les trois niveaux de gouvernement), pas de politique intérieure ;
 - les titres sont des constats chiffrés, recalculés à chaque lancement : aucun chiffre n'y est écrit en dur ;
 - les modes autres que le PPP (APP en espagnol), les travaux contre impôts, le marché public et la régie sont regroupés dans « Autres montages » ;
 - budget et dépense ne parlent que des crédits publics : le coût d'un PPP comprend la part privée, son budget non ;
-- avant l'impression, le script refuse la note si elle contient un tiret cadratin, un point d'exclamation inversé, le mot « IA », un nom d'administration, une valeur non calculée (nan) ou un mot de jugement dans un titre ;
+- avant l'impression, le script refuse la fiche si elle contient un nom de département brut du MEF (non raccourci), une valeur non calculée (nan) ou un mot de jugement dans un titre ;
 - le script vérifie que le PDF fait exactement deux pages.
 
 ## Étape 6 : carte des grands projets
@@ -123,3 +123,24 @@ Règles de présentation :
 - Le 25/11/2026 : 838 points déclarés (62 % du coût), 489 positions approchées (36 %), 62 projets absents (3 %).
 
 Limites : une route ou une voie ferrée n'est qu'un point (souvent le début du tracé) ; plusieurs projets peuvent partager le même point ; le fond OpenStreetMap est fourni sans garantie (politique d'usage des tuiles d'OpenStreetMap).
+
+## Étape 7 : note de trois pages
+
+`note.py` produit `exports/note_<date>.pdf`, la note publiée sur la page du projet, imprimée par Chrome à partir du modèle `note/modele.html` et de la feuille de style `note/style.css`. C'est une version plus courte et plus lisible que la fiche : un court essai en prose, avec deux graphiques et un tableau, chacun commenté. Elle reprend les calculs de l'étape 2 et le classement par stade de l'étape 5.
+
+La ligne directrice : les grands projets réunissent deux générations. Les chantiers en cours, déclarés viables il y a près de neuf ans en médiane (au 25/11/2026), reçoivent l'essentiel du budget de l'année ; la vague suivante, pas encore en travaux, pèse plus de la moitié du coût, et onze projets de 5 milliards de soles ou plus en font près de la moitié.
+
+Contenu :
+- page 1 : chapeau, 3 chiffres clés, coût prévu, budget de l'année et programme multiannuel répartis par stade (graphique 1) ;
+- page 2 : coût selon l'année de déclaration de viabilité (graphique 2), marché public et PPP dans chaque génération ;
+- page 3 : les projets de la vague à venir qui coûtent 5 milliards de soles ou plus (tableau), « À retenir », sources et méthode.
+
+Règles :
+- le texte est écrit à la main dans `note/modele.html`, mais chaque chiffre est recalculé à chaque lancement ;
+- les phrases qui comparent (« plus de la moitié », « près de neuf ans », « onze projets »...) sont protégées par des garde-fous (fonction `verifier_le_texte`) : si les données ne les confirment plus, le script s'arrête et demande de relire le texte ;
+- **âge d'un projet** : temps écoulé depuis sa déclaration de viabilité (colonne `FECHA_VIABILIDAD`, au format ISO), en médiane sur un groupe de projets ;
+- **arrondis** : à la française, arrondi commercial (726,5 donne 727, fonction `fr` de `fiche.py`) ; les milliards de soles sont entiers au-delà de 100, avec une décimale en dessous ;
+- mise en page : le script mesure la place libre sur chaque page (Chrome sans interface), la donne aux graphiques et à l'interligne du tableau, et s'arrête si une page déborde ; le PDF fait au plus trois pages ;
+- mêmes contrôles que la fiche avant l'impression (nom de département brut, valeur non calculée).
+
+Limites : la note ne dit rien des contrats, des entreprises ni du contexte politique ; elle s'en tient à ce que montre le fichier du MEF.
