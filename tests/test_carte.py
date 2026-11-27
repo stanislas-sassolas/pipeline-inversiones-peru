@@ -86,7 +86,8 @@ def page_de_test(tmp_path):
 def test_legende_compte_les_absents(tmp_path):
     texte, grands = page_de_test(tmp_path)
     assert "Absents de la carte : 1 projets" in texte  # le projet 4, multi-départements
-    assert "sans lien avec aucune administration" in texte
+    assert "Source : MEF, Banco de Inversiones (données ouvertes)." in texte
+    assert "sans lien" not in texte
 
 
 def test_cercle_creux_et_pointille(tmp_path):

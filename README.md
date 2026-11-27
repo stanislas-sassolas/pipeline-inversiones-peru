@@ -2,8 +2,6 @@
 
 [Versión en español](README.es.md)
 
-Projet personnel de Stanislas Sassolas (élève-ingénieur, CPE Lyon), sans lien avec aucune administration.
-
 [![Carte des grands projets d'investissement public au Pérou](docs/images/carte.png)](https://stanislas-sassolas.github.io/pipeline-inversiones-peru/carte.html)
 
 [Voir la page du projet, avec la carte interactive](https://stanislas-sassolas.github.io/pipeline-inversiones-peru/) ([en espagnol](https://stanislas-sassolas.github.io/pipeline-inversiones-peru/es.html))

@@ -95,11 +95,9 @@ STYLE = """
   body { font: 17px/1.6 Georgia, "DejaVu Serif", "Times New Roman", serif; color: #141414; background: #fff;
          max-width: 820px; margin: 0 auto; padding: 32px 16px 48px; }
   .langues { font-size: 14px; text-align: right; margin: 0 0 18px; }
-  .surtitre { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #2b3f6b; margin: 0 0 10px; }
   h1 { font-size: 38px; line-height: 1.08; font-weight: normal; margin: 0 0 14px; letter-spacing: -0.01em; }
   h2 { font-size: 24px; font-weight: normal; margin: 40px 0 14px; padding-top: 10px; border-top: 1px solid #222; }
   a { color: #2b3f6b; }
-  .auteur { font-size: 15px; color: #444; margin: 0 0 18px; }
   .note-bloc { display: grid; grid-template-columns: 300px 1fr; gap: 28px; align-items: start; }
   .note-bloc img { width: 100%; border: 1px solid #ddd; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
   .but { margin: 0 0 14px; }
@@ -114,10 +112,7 @@ TEXTES = {
     "fr": {
         "fichier": "index.html",
         "titre": "Grands projets d'investissement public au Pérou",
-        "langues": '<a href="es.html" hreflang="es" lang="es">Versión en español</a>',
-        "surtitre": "Investissement public au Pérou",
-        "auteur": ("Projet personnel de Stanislas Sassolas, élève-ingénieur (CPE Lyon), sans lien avec aucune "
-                   f'administration. <a href="{PORTFOLIO}">Retour au portfolio</a>'),
+        "langues": f'<a href="{PORTFOLIO}">Portfolio</a> · <a href="es.html" hreflang="es" lang="es">Versión en español</a>',
         "intro": """Le ministère de l'Économie et des Finances du Pérou (MEF) publie chaque jour, en données ouvertes, la liste de ses
 investissements publics actifs, environ 150 000. Ce pipeline de données en Python archive chaque version du fichier,
 calcule des indicateurs sur les projets de 100 millions de soles ou plus, repère ce qui change d'une semaine à
@@ -127,15 +122,13 @@ l'autre, suit les consultations de ProInversión, et en tire une note et une car
 <div class="note-bloc">
   <a href="note.pdf"><img src="images/note.png" alt="Première page de la note"></a>
   <div>
-    <p class="but"><b>Le but de cette note.</b> Répondre en cinq minutes à une question simple : dans l'investissement
-    public péruvien, où va l'argent aujourd'hui, et où seront les projets de demain ? Elle s'adresse aux entreprises
-    et aux observateurs qui veulent une image claire du paysage, sans jargon.</p>
-    <p class="but"><b>En une phrase.</b> Le budget de cette année finance surtout des chantiers déclarés viables il y a
-    près de neuf ans, alors que la vague suivante, plus de la moitié du coût, est encore sur plans et tient dans une
-    dizaine de très gros projets, dont plusieurs trains et métros.</p>
-    <p class="but"><b>Ce qu'elle n'est pas.</b> Ni une analyse complète (elle ne dit rien des contrats, des entreprises
-    ni du contexte politique), ni une recommandation, ni un document officiel. Elle s'en tient à ce que montre le
-    fichier du MEF, et elle est recalculée automatiquement à chaque nouvelle version.</p>
+    <p class="but">Une question simple : dans l'investissement public péruvien, où va l'argent aujourd'hui, et où
+    seront les projets de demain ?</p>
+    <p class="but">Le budget de cette année finance surtout des chantiers déclarés viables il y a près de neuf ans. La
+    vague suivante, plus de la moitié du coût, est encore sur plans et tient dans une dizaine de très gros projets,
+    dont plusieurs trains et métros.</p>
+    <p class="but">La note s'en tient à ce que montre le fichier du MEF : rien sur les contrats, les entreprises ou le
+    contexte politique. Elle est recalculée à chaque nouvelle version.</p>
     <p class="lien"><a href="note.pdf">Lire la note (PDF, 3 pages)</a></p>
   </div>
 </div>""",
@@ -161,10 +154,7 @@ Fond de carte : © contributeurs OpenStreetMap.</p>""",
     "es": {
         "fichier": "es.html",
         "titre": "Grandes proyectos de inversión pública en el Perú",
-        "langues": '<a href="index.html" hreflang="fr" lang="fr">Version française</a>',
-        "surtitre": "Inversión pública en el Perú",
-        "auteur": ("Proyecto personal de Stanislas Sassolas, estudiante de ingeniería (CPE Lyon), sin vínculo con "
-                   f'ninguna institución. <a href="{PORTFOLIO}?lang=es">Volver al portafolio</a>'),
+        "langues": f'<a href="{PORTFOLIO}?lang=es">Portafolio</a> · <a href="index.html" hreflang="fr" lang="fr">Version française</a>',
         "intro": """El Ministerio de Economía y Finanzas del Perú (MEF) publica cada día, en datos abiertos, la lista de sus
 inversiones públicas activas, unas 150 000. Este pipeline de datos en Python archiva cada versión del archivo,
 calcula indicadores sobre los proyectos de S/ 100 millones o más, detecta lo que cambia de una semana a otra,
@@ -174,15 +164,13 @@ sigue las convocatorias de ProInversión y genera una nota y un mapa.""",
 <div class="note-bloc">
   <a href="note.pdf"><img src="images/note.png" alt="Primera página de la nota (en francés)"></a>
   <div>
-    <p class="but"><b>El objetivo de la nota.</b> Responder en cinco minutos a una pregunta sencilla: en la inversión
-    pública peruana, ¿a dónde va el dinero hoy y dónde estarán los proyectos de mañana? Está pensada para empresas
-    y observadores que buscan una visión clara del panorama, sin jerga.</p>
-    <p class="but"><b>En una frase.</b> El presupuesto de este año financia sobre todo obras declaradas viables hace
-    casi nueve años, mientras que la siguiente ola, más de la mitad del costo, sigue en papel y se concentra en una
-    decena de proyectos muy grandes, entre ellos varios trenes y líneas de metro.</p>
-    <p class="but"><b>Lo que no es.</b> Ni un análisis completo (no dice nada de los contratos, las empresas ni el
-    contexto político), ni una recomendación, ni un documento oficial. Se limita a lo que muestra el archivo del MEF
-    y se recalcula automáticamente con cada nueva versión.</p>
+    <p class="but">Una pregunta sencilla: en la inversión pública peruana, ¿a dónde va el dinero hoy y dónde estarán
+    los proyectos de mañana?</p>
+    <p class="but">El presupuesto de este año financia sobre todo obras declaradas viables hace casi nueve años. La
+    siguiente ola, más de la mitad del costo, sigue en papel y se concentra en una decena de proyectos muy grandes,
+    entre ellos varios trenes y líneas de metro.</p>
+    <p class="but">La nota se limita a lo que muestra el archivo del MEF: nada sobre contratos, empresas o contexto
+    político. Se recalcula con cada nueva versión.</p>
     <p class="lien"><a href="note.pdf">Leer la nota (PDF, 3 páginas)</a> (en francés)</p>
   </div>
 </div>""",
@@ -225,9 +213,7 @@ def page_accueil(jour, note_publiee, fiche_publiee, langue="fr"):
 </head>
 <body>
 <p class="langues">{t["langues"]}</p>
-<p class="surtitre">{t["surtitre"]}</p>
 <h1>{t["titre"]}</h1>
-<p class="auteur">{t["auteur"]}</p>
 
 <p>{t["intro"]}</p>
 {t["note"] if note_publiee else ""}
